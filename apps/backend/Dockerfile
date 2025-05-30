@@ -16,5 +16,5 @@ COPY . .
 # Expose port 5001
 EXPOSE 5001
 
-# Run the backend server
+# Run the backend server with yarn dev
 CMD ["yarn", "dev"]

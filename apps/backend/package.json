@@ -4,7 +4,7 @@
     "main": "index.js",
     "license": "MIT",
     "scripts": {
-        "dev": "ts-node src/index.ts"
+        "dev": "nodemon --exec ts-node src/index.ts"
     },
     "dependencies": {
         "apollo-server-express": "^3.13.0",
@@ -19,6 +19,7 @@
         "@types/dotenv": "^8.2.3",
         "@types/express": "^5.0.2",
         "@types/node": "^22.15.28",
+        "nodemon": "^3.1.10",
         "ts-node": "^10.9.2",
         "typescript": "^5.8.3"
     }
