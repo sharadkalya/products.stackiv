@@ -1,0 +1,7 @@
+{
+  "[yaml]": {
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true
+  },
+  "yaml.format.indent": 4
+}

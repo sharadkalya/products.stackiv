@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+    backend:
+        build:
+            context: ./apps/backend
+            dockerfile: Dockerfile
+        container_name: stayinn-backend
+        ports:
+            - '5001:5001'
+        env_file:
+            - ./apps/backend/.env
+        volumes:
+            - ./apps/backend:/usr/src/app/backend
+            - /usr/src/app/backend/node_modules
+        networks:
+            - stayinn-network
+
+    frontend:
+        build:
+            context: ./apps/frontend
+            dockerfile: Dockerfile
+        container_name: stayinn-frontend
+        ports:
+            - '3001:3001'
+        env_file:
+            - ./apps/frontend/.env
+        volumes:
+            - ./apps/frontend:/usr/src/app/frontend
+            - /usr/src/app/frontend/node_modules
+        depends_on:
+            - backend
+        networks:
+            - stayinn-network
+
+    stayinn-app:
+        image: busybox
+        depends_on:
+            - backend
+            - frontend
+        networks:
+            - stayinn-network
+        entrypoint: [ "tail", "-f", "/dev/null" ]
+
+networks:
+    stayinn-network:
+        driver: bridge
