@@ -40,7 +40,7 @@ services:
             - hosts
         networks:
             - stayinn-network
-        entrypoint: [ "tail", "-f", "/dev/null" ]
+        entrypoint: ['tail', '-f', '/dev/null']
 
 networks:
     stayinn-network:
