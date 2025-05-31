@@ -16,18 +16,18 @@ services:
         networks:
             - stayinn-network
 
-    frontend:
+    hosts:
         build:
-            context: ./apps/frontend
+            context: ./apps/hosts
             dockerfile: Dockerfile
-        container_name: stayinn-frontend
+        container_name: stayinn-hosts
         ports:
             - '3001:3001'
         env_file:
-            - ./apps/frontend/.env
+            - ./apps/hosts/.env
         volumes:
-            - ./apps/frontend:/usr/src/app/frontend
-            - /usr/src/app/frontend/node_modules
+            - ./apps/hosts:/usr/src/app/hosts
+            - /usr/src/app/hosts/node_modules
         depends_on:
             - backend
         networks:
@@ -37,7 +37,7 @@ services:
         image: busybox
         depends_on:
             - backend
-            - frontend
+            - hosts
         networks:
             - stayinn-network
         entrypoint: [ "tail", "-f", "/dev/null" ]

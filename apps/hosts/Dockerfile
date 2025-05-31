@@ -2,7 +2,7 @@
 FROM node:18
 
 # Create app directory inside container
-WORKDIR /usr/src/app/frontend
+WORKDIR /usr/src/app/hosts
 
 # Copy package.json and yarn.lock first
 COPY package.json yarn.lock ./
