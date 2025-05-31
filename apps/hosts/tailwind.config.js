@@ -1,0 +1,64 @@
+import themeColors from './src/theme/colors.json';
+
+if (process.env.NODE_ENV !== 'production') {
+    console.log('_____******____TAILWIND_CONFIGURATION_____******____');
+}
+
+module.exports = {
+    darkMode: 'media', // or 'class' depending on your needs
+    content: [
+        './app/**/*.{js,ts,jsx,tsx,mdx}',
+        './pages/**/*.{js,ts,jsx,tsx,mdx}',
+        './components/**/*.{js,ts,jsx,tsx,mdx}',
+        './src/**/*.{js,ts,jsx,tsx,mdx}',
+    ],
+    theme: {
+        extend: {
+            colors: {
+                primary: themeColors.light.primary,
+                primaryHover: themeColors.light.primaryHover,
+                secondary: themeColors.light.secondary,
+                secondaryHover: themeColors.light.secondaryHover,
+                background: themeColors.light.background,
+                surface: themeColors.light.surface,
+                textPrimary: themeColors.light.textPrimary,
+                textSecondary: themeColors.light.textSecondary,
+                border: themeColors.light.border,
+                error: themeColors.light.error,
+                success: themeColors.light.success,
+                warning: themeColors.light.warning,
+                overlay: themeColors.light.overlay,
+                disabledBg: themeColors.light.disabledBg,
+                disabledText: themeColors.light.disabledText,
+
+                dark: {
+                    primary: themeColors.dark.primary,
+                    primaryHover: themeColors.dark.primaryHover,
+                    secondary: themeColors.dark.secondary,
+                    secondaryHover: themeColors.dark.secondaryHover,
+                    background: themeColors.dark.background,
+                    surface: themeColors.dark.surface,
+                    textPrimary: themeColors.dark.textPrimary,
+                    textSecondary: themeColors.dark.textSecondary,
+                    border: themeColors.dark.border,
+                    error: themeColors.dark.error,
+                    success: themeColors.dark.success,
+                    warning: themeColors.dark.warning,
+                    overlay: themeColors.dark.overlay,
+                    disabledBg: themeColors.dark.disabledBg,
+                    disabledText: themeColors.dark.disabledText,
+                },
+            },
+            backgroundColor: {
+                background: themeColors.light.background,
+                darkBackground: themeColors.dark.background,
+            },
+            textColor: {
+                textPrimary: themeColors.light.textPrimary,
+                darkTextPrimary: themeColors.dark.textPrimary,
+            },
+        },
+    },
+    plugins: [], // Remove if not needed
+    output: './public/dist/styles.css',
+};
