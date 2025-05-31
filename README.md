@@ -39,11 +39,10 @@ docker-compose up backend
 #### To run the Frontend (Host) application:
 
 ```bash
-docker-compose up frontend
+docker-compose up hosts
 ```
 
 ## Known Issues:
 
 * The setup runs `yarn install` on every container during startup. This can take some time, depending on your internet connection and project dependencies.
 
----
