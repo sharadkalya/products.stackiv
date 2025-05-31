@@ -46,4 +46,3 @@ docker-compose up frontend
 
 * The setup runs `yarn install` on every container during startup. This can take some time, depending on your internet connection and project dependencies.
 
----
