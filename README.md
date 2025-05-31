@@ -39,7 +39,7 @@ docker-compose up backend
 #### To run the Frontend (Host) application:
 
 ```bash
-docker-compose up frontend
+docker-compose up hosts
 ```
 
 ## Known Issues:
