@@ -13,16 +13,8 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-            <body className="bg-background text-textPrimary dark:bg-darkBackground dark:text-darkTextPrimary">
-                <div className="bg-primary">
-                    HELLOOOOOOO
-                </div>
-                <div className="bg-secondary text-white p-6">Outstanding Secondary Color</div>
+            <body className="bg-background">
                 {children}
-                <h1 className="text-3xl font-bold underline">Hello, Next.js!</h1>
-                <div className="bg-customRed min-h-screen flex items-center justify-center">
-                    <h1 className="text-white">Hello, World!</h1>
-                </div>
             </body>
         </html>
     );
