@@ -1,10 +1,19 @@
-/* styles/globals.css */
+/* globals.css */
+@import "tailwindcss";
 
-/* Tailwind's default base styles */
-@tailwind base;
+/* Define the theme variables */
+@theme {
+    --font-display: "Satoshi", "sans-serif";
+    --color-primary: #3490dc;
+    --color-secondary: #ff6347;
+    /* Add more custom properties here */
+}
 
-/* Tailwind's utility classes */
-@tailwind components;
-
-/* Tailwind's utility classes */
-@tailwind utilities;
+@media (prefers-color-scheme: dark) {
+    @theme {
+        --color-primary: #1e3a8a;
+        /* Dark mode primary color */
+        --color-secondary: #d97706;
+        /* Dark mode secondary color */
+    }
+}
