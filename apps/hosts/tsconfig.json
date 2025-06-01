@@ -22,6 +22,7 @@
                 "name": "next"
             }
         ],
+        "baseUrl": ".",
         "paths": {
             "@hosts/*": [
                 "./src/*"
@@ -29,6 +30,12 @@
             "@/*": [
                 "./src/*"
             ],
+            "shared-types": [
+                "../../packages/shared-types/src"
+            ],
+            "shared-auth": [
+                "../../packages/shared-auth/src"
+            ]
         }
     },
     "include": [

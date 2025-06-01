@@ -17,6 +17,9 @@
         "next-themes": "^0.4.6",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
+        "react-hook-form": "^7.56.4",
+        "shared-types": "^1.0.0",
+        "shared-auth": "^1.0.0",
         "tailwind-merge": "^3.3.0",
         "ui": "shadcn/ui"
     },

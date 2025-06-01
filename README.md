@@ -1,48 +1,111 @@
 # stayinn
 
-In progress
-This project uses Docker for containerization. Follow the instructions below to set up and run the application locally.
-
+**Work in progress 🚧**  
+Stayinn is a full-stack monorepo app currently under development. This app will support multiple user roles, authentication with Firebase (email, Google, phone), and data persistence via MongoDB Atlas.
 
 ---
 
-## Prerequisites
+## 🧱 Project Structure
 
-Before you can run the application locally, make sure you have Docker installed on your system.
+This monorepo uses **Yarn Workspaces** to manage shared packages and multiple applications:
 
-### To install Docker:
-
-Click [here](https://docs.docker.com/get-docker/) to follow the installation guide for Docker based on your operating system.
-
-## Running the Application Locally
-
-### Full App Setup:
-
-To start the entire application (all services), run the following command from the root of your project:
-
-```bash
-docker-compose up stayinn-app
 ```
 
-This will build and run all necessary containers for the app.
+stayinn/
+│
+├── apps/
+│   ├── hosts/           # Frontend (Next.js)
+│   └── backend/         # Backend (Node.js / Express)
+│
+├── packages/
+│   ├── shared-auth/     # Firebase logic (frontend-side)
+│   └── shared-types/    # Shared TypeScript types/interfaces
 
-### Running Specific Apps:
-
-You can also choose to run specific services individually:
-
-#### To run the Backend service:
-
-```bash
-docker-compose up backend
 ```
 
-#### To run the Frontend (Host) application:
+---
+
+## ⚙️ Development Setup (No Docker)
+
+> Docker is intentionally skipped during early development to speed up iteration (e.g. `yarn add`, live reload, hot module changes). Docker will be reintroduced during deployment or staging setup.
+
+### Prerequisites
+
+-   Node.js (>= 18.x)
+-   Yarn (v1 or v3, depending on your setup)
+-   MongoDB Atlas account (or local MongoDB for testing)
+-   Firebase project setup
+
+---
+
+## 🧑‍💻 Getting Started
+
+From the root of the repo:
 
 ```bash
-docker-compose up hosts
+# Install all dependencies
+yarn install
+
+# Start backend and frontend together
+yarn dev
 ```
 
-## Known Issues:
+To run individual apps:
 
-* The setup runs `yarn install` on every container during startup. This can take some time, depending on your internet connection and project dependencies.
+```bash
+# Start backend API server
+yarn workspace backend dev
 
+# Start frontend (hosts - Next.js)
+yarn workspace hosts dev
+```
+
+---
+
+## 📦 Shared Packages
+
+This repo includes shared code organized in `/packages`:
+
+-   `shared-types`: Common types and interfaces
+-   `shared-auth`: Shared Firebase logic (used in frontend)
+
+These packages are imported using TypeScript path aliases and watched during local development for hot reload.
+
+---
+
+## 📌 Notes
+
+-   All development is currently done **outside of Docker** for speed and simplicity.
+-   Docker will be reintroduced later for staging, CI/CD, and production.
+-   Firebase config and secrets should **not** be committed. Use `.env.local` files per app.
+
+---
+
+## 🚀 Upcoming
+
+-   ✅ Monorepo with Yarn Workspaces
+-   ✅ Shared type packages
+-   🔜 Authentication flow (email, Google, phone via Firebase)
+-   🔜 MongoDB persistence layer
+-   🔜 Email verification flow
+-   🔜 Session/token auth
+
+---
+
+## 🧠 Why no Docker yet?
+
+> Docker adds overhead during rapid iteration (e.g., frequent `yarn add`, file watching, rebuilds). It also creates duplication between host and container `node_modules`, which can be cumbersome early on.
+> We'll reintroduce Docker once the project reaches a stable milestone (e.g., production API, frontend routes, CI pipelines).
+
+---
+
+## 🛠️ Tools Used
+
+-   Next.js
+-   Node.js / Express
+-   Firebase Auth SDK
+-   MongoDB Atlas
+-   TypeScript
+-   TailwindCSS + shadcn/ui
+-   Yarn Workspaces
+-   Amazon S3
