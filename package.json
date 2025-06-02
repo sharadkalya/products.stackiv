@@ -1,0 +1,13 @@
+{
+    "private": true,
+    "scripts": {
+        "dev": "concurrently -k -n hosts,backend -c blue,green \"yarn workspace hosts dev\" \"yarn workspace backend dev\""
+    },
+    "workspaces": [
+        "apps/*",
+        "packages/*"
+    ],
+    "devDependencies": {
+        "concurrently": "^9.1.2"
+    }
+}

@@ -1,0 +1,18 @@
+{
+    "name": "shared-auth",
+    "version": "1.0.0",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "tsc"
+    },
+    "dependencies": {
+        "stayinn-types": "^1.0.0"
+    },
+    "devDependencies": {
+        "typescript": "^5.0.0"
+    }
+}

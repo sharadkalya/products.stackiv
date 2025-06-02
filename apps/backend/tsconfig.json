@@ -9,9 +9,18 @@
         "strict": true,
         "baseUrl": "./",
         "paths": {
-            "@/*": ["src/*"]
+            "@/*": [
+                "src/*"
+            ],
+            "stayinn-types": [
+                "../../packages/stayinn-types/src"
+            ],
         }
     },
-    "include": ["src"],
-    "exclude": ["node_modules"]
+    "include": [
+        "src"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
 }
