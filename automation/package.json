@@ -1,0 +1,22 @@
+{
+    "name": "automation",
+    "version": "1.0.0",
+    "description": "Automation project using Playwright and Cucumber",
+    "main": "index.js",
+    "author": "Priyanka",
+    "license": "MIT",
+    "scripts": {
+        "test": "cucumber-js",
+        "test:chromium": "BROWSER_NAME=chromium npx cucumber-js",
+        "test:firefox": "BROWSER_NAME=firefox npx cucumber-js",
+        "test:webkit": "BROWSER_NAME=webkit npx cucumber-js"
+    },
+    "dependencies": {
+        "@playwright/test": "^1.52.0"
+    },
+    "devDependencies": {
+        "@cucumber/cucumber": "^11.3.0",
+        "cross-env": "^7.0.3",
+        "playwright": "^1.52.0"
+    }
+}
