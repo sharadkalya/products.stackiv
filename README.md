@@ -106,6 +106,6 @@ These packages are imported using TypeScript path aliases and watched during loc
 -   Firebase Auth SDK
 -   MongoDB Atlas
 -   TypeScript
--   TailwindCSS + shadcn/ui
+-   TailwindCSS + daisyUI
 -   Yarn Workspaces
 -   Amazon S3
