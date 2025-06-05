@@ -1,37 +1,47 @@
+/**
+ * Step definitions for StayInn UI automation using Cucumber and Playwright/Puppeteer.
+ * Handles browser setup/teardown and step logic for homepage navigation and title verification.
+ */
+
 const { Given, When, Then, Before, After } = require('@cucumber/cucumber');
 const assert = require('assert');
-const BrowserHelper = require('../utils/browserHelper'); // Import the helper class
+const BrowserHelper = require('../utils/browserHelper');
 
 let browserHelper;
 
+/**
+ * Before hook: Launches browser and attaches page to scenario context.
+ */
 Before(async function () {
   browserHelper = new BrowserHelper();
-  await browserHelper.launchBrowser(); // Launch the browser
-  this.page = await browserHelper.getPage(); // Attach the page to `this` for access in steps
+  await browserHelper.launchBrowser();
+  this.page = await browserHelper.getPage();
 });
 
+/**
+ * After hook: Closes the browser after each scenario.
+ */
 After(async function () {
-  await browserHelper.closeBrowser(); // Close the browser after the test
+  await browserHelper.closeBrowser();
 });
 
+/**
+ * Step: Navigates to the homepage.
+ */
 Given('I am on the homepage', async function () {
-  try {
-    await this.page.goto('http://localhost:3001'); // Navigate to your URL
-    // Log to console or use Playwright's built-in reporter for status info
-    console.log('Successfully navigated to homepage');
-  } catch (err) {
-    console.error(`Failed to navigate to homepage: ${err.message}`);
-  }
+  await this.page.goto('http://localhost:3001');
+  console.log('Navigated to homepage');
 });
 
+/**
+ * Step: Verifies the page title matches the expected value.
+ */
 Then('I should see title as {string}', async function (expectedTitle) {
-  try {
-    const actualTitle = await this.page.title();
-    // Check if the title matches the expected title
-    assert.strictEqual(actualTitle, expectedTitle, `Expected title to be "${expectedTitle}" but got "${actualTitle}"`);
-    // Log to console or use Playwright's built-in reporter for status info
-    console.log(`Title is as expected: ${expectedTitle}`);
-  } catch (err) {
-    console.error(`Title mismatch. Expected: ${expectedTitle}, but got: ${err.message}`);
-  }
+  const actualTitle = await this.page.title();
+  assert.strictEqual(
+    actualTitle,
+    expectedTitle,
+    `Expected title to be "${expectedTitle}" but got "${actualTitle}"`
+  );
+  console.log(`Title verified: ${expectedTitle}`);
 });

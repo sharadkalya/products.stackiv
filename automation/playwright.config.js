@@ -21,5 +21,6 @@ module.exports = {
   ],
   reporter: [
     ['html', { outputFolder: 'playwright-report', open: 'always' }],  // Specify the HTML reporter
+    
   ],
 };
