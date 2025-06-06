@@ -4,12 +4,12 @@
 
 
 body {
-    /* background: linear-gradient(69deg, #e1dcdb, #a6b1d5); */
+    background: linear-gradient(69deg, #e1dcdb, #a6b1d5);
 }
 
 /* Dark Theme Background Gradient */
 @media (prefers-color-scheme: dark) {
     body {
-        /* background: linear-gradient(69deg, #312f35, #2f4553) */
+        background: linear-gradient(69deg, #312f35, #2f4553)
     }
 }

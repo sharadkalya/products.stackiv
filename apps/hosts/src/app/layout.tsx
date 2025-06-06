@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import type { User } from "shared-types";
 import { login } from "shared-auth";
+import { I18nProvider } from "@hosts/components/I18nProvider";
 
 async function testLogin() {
     const response = await login({ email: "a@b.com", password: "123" });
@@ -34,7 +35,7 @@ const dummyUser: User = {
 };
 
 console.log("Dummy user:", dummyUser);
-console.log('hello world')
+console.log('hello world');
 export default function RootLayout({
     children,
 }: Readonly<{
@@ -45,7 +46,9 @@ export default function RootLayout({
             <body
                 className={`${geistSans.variable} ${geistMono.variable} antialiased`}
             >
-                {children}
+                <I18nProvider>
+                    {children}
+                </I18nProvider>
             </body>
         </html>
     );

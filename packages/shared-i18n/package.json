@@ -1,0 +1,43 @@
+{
+    "name": "shared-i18n",
+    "version": "1.0.0",
+    "description": "Shared i18n package for Stayinn apps",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "tsc",
+        "clean": "rm -rf dist",
+        "lint": "eslint src --ext .ts,.tsx",
+        "prepare": "npm run build"
+    },
+    "keywords": [
+        "i18n",
+        "typescript",
+        "react-native",
+        "nextjs"
+    ],
+    "peerDependencies": {
+        "react": "^18.0.0",
+        "react-dom": "^18.0.0",
+        "react-i18next": "^15.5.2"
+    },
+    "devDependencies": {
+        "typescript": "^5.0.0",
+        "eslint": "^8.0.0",
+        "@types/node": "^20.0.0",
+        "@types/react": "^18.0.0",
+        "@types/react-dom": "^18.0.0",
+        "@types/react-i18next": "^8.1.0",
+        "react": "^18.0.0",
+        "react-dom": "^18.0.0",
+        "react-i18next": "^15.5.2"
+    },
+    "dependencies": {
+        "i18next": "^25.2.1",
+        "i18next-browser-languagedetector": "^8.1.0",
+        "i18next-http-backend": "^3.0.2"
+    }
+}
