@@ -15,6 +15,7 @@ const eslintConfig = [
         files: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
         rules: {
             semi: ["error", "always"],
+            "quotes": ["error", "single", { "avoidEscape": true, "allowTemplateLiterals": true }]
         },
     },
 ];

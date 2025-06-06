@@ -7,6 +7,10 @@
     "files": [
         "dist"
     ],
+    "exports": {
+        ".": "./dist/index.js",
+        "./server": "./dist/server.js"
+    },
     "scripts": {
         "build": "tsc",
         "clean": "rm -rf dist",
@@ -20,9 +24,8 @@
         "nextjs"
     ],
     "peerDependencies": {
-        "react": "^18.0.0",
-        "react-dom": "^18.0.0",
-        "react-i18next": "^15.5.2"
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0"
     },
     "devDependencies": {
         "typescript": "^5.0.0",
@@ -31,9 +34,9 @@
         "@types/react": "^18.0.0",
         "@types/react-dom": "^18.0.0",
         "@types/react-i18next": "^8.1.0",
-        "react": "^18.0.0",
-        "react-dom": "^18.0.0",
-        "react-i18next": "^15.5.2"
+        "react-i18next": "^15.5.2",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0"
     },
     "dependencies": {
         "i18next": "^25.2.1",
