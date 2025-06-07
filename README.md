@@ -110,8 +110,6 @@ These packages are imported using TypeScript path aliases and watched during loc
 -   Yarn Workspaces
 -   Amazon S3
 
-Great — your current `README.md` is already quite clear and well-structured. To include the server-side i18n setup with `react-i18next` and a shared `shared-i18n` package, here's how you can extend it:
-
 ---
 
 ### 🌐 Internationalization (i18n)
