@@ -109,3 +109,74 @@ These packages are imported using TypeScript path aliases and watched during loc
 -   TailwindCSS + daisyUI
 -   Yarn Workspaces
 -   Amazon S3
+
+Great — your current `README.md` is already quite clear and well-structured. To include the server-side i18n setup with `react-i18next` and a shared `shared-i18n` package, here's how you can extend it:
+
+---
+
+### 🌐 Internationalization (i18n)
+
+We use **`react-i18next`** to enable translation support across apps. The translations and config are managed in a shared package: [`packages/shared-i18n`](../packages/shared-i18n).
+
+#### Shared i18n Setup
+
+-   Add `shared-i18n` as a workspace under `packages/`.
+-   Install `i18next`, `react-i18next`, and optionally `i18next-browser-languagedetector`, `i18next-http-backend`.
+-   Create locale JSON files (`en.json`, `fr.json`, etc.) under `locales/`.
+-   Setup:
+
+    ```ts
+    // shared-i18n/src/config/initWeb.ts
+    import i18n from 'i18next';
+    import { initReactI18next } from 'react-i18next';
+    import en from '../locales/en.json';
+    import fr from '../locales/fr.json';
+
+    i18n.use(initReactI18next).init({
+        resources: {
+            en: { translation: en },
+            fr: { translation: fr },
+        },
+        fallbackLng: 'en',
+        interpolation: { escapeValue: false },
+    });
+
+    export default i18n;
+    ```
+
+---
+
+### 🧠 Server-side Translations with Next.js
+
+To support translations during SSR (e.g. in `app/page.tsx` or `layout.tsx`):
+
+1. Add a pure `i18next` setup:
+
+    ```ts
+    // shared-i18n/src/server.ts
+    import { createInstance } from 'i18next';
+    import en from './locales/en.json';
+    import fr from './locales/fr.json';
+
+    const resources = { en: { translation: en }, fr: { translation: fr } };
+
+    export async function getServerTranslation(lang: 'en' | 'fr') {
+        const i18n = createInstance();
+        await i18n.init({ lng: lang, fallbackLng: 'en', resources });
+        return i18n.getFixedT(lang);
+    }
+    ```
+
+2. ⚠️ **Important**: Export this utility separately in `package.json` under a `server` path using `"exports"`:
+
+    ```json
+    // shared-i18n/package.json
+    "exports": {
+      ".": "./dist/index.js",
+      "./server": "./dist/server.js"
+    }
+    ```
+
+    This ensures React-internal modules like `react-i18next` are not bundled accidentally in server-only contexts (which caused major debugging issues).
+
+---
