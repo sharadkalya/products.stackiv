@@ -8,11 +8,11 @@ export default async function Login() {
     const t = await getServerTranslation('en');
     return (
         <div className="loginSignupPage">
-            <div className="tabs tabs-lift">
+            <div className="tabs tabs-lift flex">
                 <input
                     type="radio"
                     name="loginMethod"
-                    className="tab"
+                    className="tab w-1/2"
                     aria-label={t('loginWithEmail')}
                     defaultChecked
                 />
@@ -23,7 +23,7 @@ export default async function Login() {
                 <input
                     type="radio"
                     name="loginMethod"
-                    className="tab"
+                    className="tab w-1/2"
                     aria-label={LOGIN_WITH_PHONE}
                 />
                 <div className="tab-content bg-base-100 border-base-300 p-6">

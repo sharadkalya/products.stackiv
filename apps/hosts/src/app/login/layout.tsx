@@ -5,7 +5,7 @@ export default function LoginLayout({
 }>) {
     return (
         <div className="loginLayout flex md:items-center justify-center min-h-screen">
-            <div className="w-full max-w-md p-6 rounded-lg shadow">
+            <div className="w-full max-w-md p-6 rounded-lg shadow bg-base-100">
                 {children}
             </div>
         </div>
