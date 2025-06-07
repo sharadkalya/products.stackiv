@@ -1,3 +1,4 @@
+export * from "./schemas";
 export interface User {
     uid: string;
     email: string;

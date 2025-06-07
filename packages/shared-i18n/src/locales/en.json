@@ -1,6 +1,22 @@
 {
     "app_name": "Stayinn",
-    "welcome": "Welcome",
+    "confirmPassword": "Confirm Password",
+    "confirmPasswordMinLengthError": "Confirm Password must be at least 6 characters long",
+    "email": "Email",
+    "emailPlaceholder": "Enter your email",
+    "invalidEmailError": "Invalid email format",
     "login": "Log In",
-    "loginWithEmail": "Login with email"
+    "loginWithEmail": "Login with Email",
+    "loginWithFacebook": "Login with Facebook",
+    "loginWithGoogle": "Login with Google",
+    "loginWithPhone": "Login with Phone",
+    "loginWithSocial": "Login with social media",
+    "noAccount": "Don't have an account?",
+    "or": "Or",
+    "password": "Password",
+    "passwordMinLengthError": "Password must be at least 6 characters long",
+    "passwordPlaceholder": "Enter your password",
+    "passwordsDontMatchError": "Passwords do not match",
+    "signUp": "Sign up",
+    "welcome": "Welcome"
 }
