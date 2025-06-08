@@ -1,4 +1,5 @@
 {
+    "extends": "../../tsconfig.json",
     "compilerOptions": {
         "jsx": "react-jsx",
         "resolveJsonModule": true,
@@ -7,7 +8,8 @@
         "module": "ESNext",
         "moduleResolution": "Node",
         "target": "ES2020",
-        "outDir": "dist"
+        "outDir": "dist",
+        "composite": true
     },
     "include": [
         "src"

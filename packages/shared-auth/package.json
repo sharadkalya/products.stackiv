@@ -10,7 +10,8 @@
         "build": "tsc"
     },
     "dependencies": {
-        "stayinn-types": "^1.0.0"
+        "firebase": "^11.9.0",
+        "shared-types": "^1.0.0"
     },
     "devDependencies": {
         "typescript": "^5.0.0"

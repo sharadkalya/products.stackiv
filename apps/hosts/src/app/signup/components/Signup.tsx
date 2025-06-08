@@ -6,9 +6,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
 import SocialLogin from '@hosts/components/common/SocialLogin';
 import { useTranslation } from 'shared-i18n';
+import { signUpWithEmailPassword } from 'shared-auth';
 
 export default function Signup() {
     const { t } = useTranslation();
+
     const {
         register,
         handleSubmit,
@@ -17,8 +19,11 @@ export default function Signup() {
         resolver: zodResolver(signupSchema),
     });
 
-    const onSubmit = (data: TSignupSchema) => {
+    const onSubmit = async (data: TSignupSchema) => {
         console.log(data);
+        const { email, password } = data;
+        const res = await signUpWithEmailPassword(email, password);
+        console.log('res', res);
     };
 
     const renderError = (msg: string) => {
@@ -69,6 +74,7 @@ export default function Signup() {
                         )}
                     </div>
                     <button disabled={isSubmitting} type="submit" className="btn btn-primary">
+                        {isSubmitting && (<span className="loading loading-ring"></span>)}
                         {t('Signup')}
                     </button>
                 </fieldset>

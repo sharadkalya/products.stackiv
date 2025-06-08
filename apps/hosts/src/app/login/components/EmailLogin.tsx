@@ -54,6 +54,7 @@ export default function EmailLogin() {
                         )}
                     </div>
                     <button disabled={isSubmitting} type="submit" className="btn btn-primary">
+                        {isSubmitting && (<span className="loading loading-ring"></span>)}
                         {t('login')}
                     </button>
                 </fieldset>

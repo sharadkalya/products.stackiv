@@ -1,17 +1,10 @@
 import type { Metadata } from 'next';
+// eslint-disable-next-line camelcase
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import type { User } from 'shared-types';
-import { login } from 'shared-auth';
 import { I18nProvider } from '@hosts/components/I18nProvider';
 import { APP_NAME } from 'shared-config';
-
-async function testLogin() {
-    const response = await login({ email: 'a@b.com', password: '123' });
-    console.log('Login response:', response);
-}
-
-testLogin();
 
 const geistSans = Geist({
     variable: '--font-geist-sans',
