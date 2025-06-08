@@ -1,29 +1,32 @@
 'use client';
-import { useTranslation } from 'shared-i18n';
 import { useForm } from 'react-hook-form';
-import { loginSchema } from 'shared-types';
-import type { TLoginSchema } from 'shared-types';
+import { signupSchema } from 'shared-types';
+import type { TSignupSchema } from 'shared-types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
 import SocialLogin from '@hosts/components/common/SocialLogin';
+import { useTranslation } from 'shared-i18n';
 
-export default function EmailLogin() {
+export default function Signup() {
     const { t } = useTranslation();
-
     const {
         register,
         handleSubmit,
         formState: { errors, isSubmitting },
-    } = useForm<TLoginSchema>({
-        resolver: zodResolver(loginSchema),
+    } = useForm<TSignupSchema>({
+        resolver: zodResolver(signupSchema),
     });
 
-    const onSubmit = (data: TLoginSchema) => {
+    const onSubmit = (data: TSignupSchema) => {
         console.log(data);
     };
 
+    const renderError = (msg: string) => {
+        return <span className="text-error text-sm">{t(msg)}</span>;
+    };
+
     return (
-        <div className="emailLogin">
+        <div className="emailSignup w-full">
             <form onSubmit={handleSubmit(onSubmit)}>
                 <fieldset className="fieldset flex flex-col space-y-4">
                     <div className="flex flex-col space-y-1">
@@ -37,7 +40,7 @@ export default function EmailLogin() {
                             placeholder={t('emailPlaceholder')}
                         />
                         {errors.email && (
-                            <span className="text-error text-sm">{errors.email.message}</span>
+                            renderError(errors.email.message as string)
                         )}
                     </div>
 
@@ -46,22 +49,34 @@ export default function EmailLogin() {
                         <input
                             {...register('password')}
                             type="password"
-                            className={`input w-full ${errors.email ? 'input-error' : ''}`}
+                            className={`input w-full ${errors.password ? 'input-error' : ''}`}
                             placeholder={t('passwordPlaceholder')}
                         />
                         {errors.password && (
-                            <span className="text-error text-sm">{errors.password.message}</span>
+                            renderError(errors.password.message as string)
+                        )}
+                    </div>
+                    <div className="flex flex-col space-y-1">
+                        <label className="label">{t('confirmPassword')}</label>
+                        <input
+                            {...register('confirmPassword')}
+                            type="password"
+                            className={`input w-full ${errors.confirmPassword ? 'input-error' : ''}`}
+                            placeholder={t('passwordPlaceholder')}
+                        />
+                        {errors.confirmPassword && (
+                            renderError(errors.confirmPassword.message as string)
                         )}
                     </div>
                     <button disabled={isSubmitting} type="submit" className="btn btn-primary">
-                        {t('login')}
+                        {t('Signup')}
                     </button>
                 </fieldset>
             </form>
             <div className="text-sm text-center mt-4">
                 <span>{t('noAccount')} </span>
-                <Link href="/signup" className="link link-primary">
-                    {t('signUp')}
+                <Link href="/login" className="link link-primary">
+                    {t('login')}
                 </Link>
             </div>
             <div className="divider">{t('or')}</div>

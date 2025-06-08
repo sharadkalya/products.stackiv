@@ -1,4 +1,3 @@
-// shared-i18n/src/index.ts
 import en from './locales/en.json';
 import fr from './locales/fr.json';
 export * from './config/initWeb';

@@ -1,4 +1,3 @@
-// packages/shared-i18n/src/server.ts
 import { createInstance } from 'i18next';
 import en from './locales/en.json';
 import fr from './locales/fr.json';
@@ -16,5 +15,7 @@ export async function getServerTranslation(lang: 'en' | 'fr') {
         resources,
         interpolation: { escapeValue: false },
     });
-    return i18n.getFixedT(lang);
+    return {
+        t: i18n.getFixedT(lang)
+    };
 }
