@@ -4,9 +4,11 @@ import express from 'express';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 
+import { connectDB } from './db';
 import routes from './routes/index.routes';
 
 dotenv.config();
+
 // Define limiter - example: max 100 requests per 15 minutes per IP
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
@@ -28,8 +30,14 @@ app.use(
 app.use(express.json());
 app.use('/api', routes);
 
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT ?? 5001;
 
 app.listen(PORT, () => {
     console.log(`🚀 Server is running on http://localhost:${PORT}`);
 });
+
+async function startServer() {
+    await connectDB();
+}
+
+startServer();
