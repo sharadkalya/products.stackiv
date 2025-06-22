@@ -7,11 +7,10 @@ export type AuthStatus = 'pending' | 'verified' | 'rejected';
 
 export interface ISignupResult {
     success: boolean;
-    requiresEmailVerification?: boolean;
-    message?: string;
+    emailVerified?: boolean;
+    message: string;
     user?: {
         uid: string;
         email: string | null;
-        status?: AuthStatus;
     };
 }

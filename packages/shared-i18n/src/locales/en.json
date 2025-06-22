@@ -18,5 +18,11 @@
     "passwordPlaceholder": "Enter your password",
     "passwordsDontMatchError": "Passwords do not match",
     "signUp": "Sign up",
-    "welcome": "Welcome"
+    "welcome": "Welcome",
+    "couldntCreateUser": "Couldn't create user",
+    "emailAlreadyInUse": "Email already in use",
+    "verificationEmailSent": "Please verify your email and then login",
+    "couldntLoginUser": "Couldn't login user, try later",
+    "success": "Success",
+    "invalidCredentials": "Invalid credentials"
 }

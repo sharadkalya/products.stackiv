@@ -24,6 +24,9 @@
         ],
         "baseUrl": ".",
         "paths": {
+            "@common/*": [
+                "./src/components/common/*"
+            ],
             "@hosts/*": [
                 "./src/*"
             ],

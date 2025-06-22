@@ -3,7 +3,7 @@ import { z } from 'zod';
 // Define the login schema
 export const loginSchema = z.object({
     email: z.string().email(),
-    password: z.string().min(6),
+    password: z.string(),
 });
 
 // Define the signup schema
@@ -25,3 +25,11 @@ export const signupSchema = z.object({
 // Define the types for the login and signup schemas
 export type TLoginSchema = z.infer<typeof loginSchema>;
 export type TSignupSchema = z.infer<typeof signupSchema>;
+
+// API Schema
+export const SignupApiSchema = z.object({
+    email: z.string().email(),
+    role: z.string(),
+    password: z.string().min(6),
+    uuid: z.string()
+});

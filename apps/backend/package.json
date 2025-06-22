@@ -4,22 +4,33 @@
     "main": "index.js",
     "license": "MIT",
     "scripts": {
-        "dev": "nodemon --exec ts-node src/index.ts"
+        "dev": "node -r tsconfig-paths/register -r ts-node/register src/index.ts"
     },
     "dependencies": {
+        "accesscontrol": "^2.2.1",
         "apollo-server-express": "^3.13.0",
         "cors": "^2.8.5",
         "dotenv": "^16.5.0",
         "express": "^5.1.0",
+        "express-rate-limit": "^7.5.1",
         "graphql": "^16.11.0",
+        "helmet": "^8.1.0",
+        "jsonwebtoken": "^9.0.2",
         "mongoose": "^8.15.1",
-        "shared-types": "^1.0.0"
+        "shared-types": "^1.0.0",
+        "tsconfig-paths": "^4.2.0"
     },
     "devDependencies": {
         "@types/cors": "^2.8.18",
         "@types/dotenv": "^8.2.3",
         "@types/express": "^5.0.2",
+        "@types/jsonwebtoken": "^9.0.10",
         "@types/node": "^22.15.28",
+        "@typescript-eslint/eslint-plugin": "^8.34.1",
+        "@typescript-eslint/parser": "^8.34.1",
+        "eslint": "^9.29.0",
+        "eslint-config-prettier": "^10.1.5",
+        "eslint-plugin-import": "^2.32.0",
         "nodemon": "^3.1.10",
         "ts-node": "^10.9.2",
         "typescript": "^5.8.3"

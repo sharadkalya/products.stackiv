@@ -1,14 +1,21 @@
 'use client';
-import { useTranslation } from 'shared-i18n';
-import { useForm } from 'react-hook-form';
-import { loginSchema } from 'shared-types';
-import type { TLoginSchema } from 'shared-types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
-import SocialLogin from '@hosts/components/common/SocialLogin';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { signInWithEmailPassword } from 'shared-auth';
+import { useTranslation } from 'shared-i18n';
+import { loginSchema } from 'shared-types';
+import type { TLoginSchema } from 'shared-types';
+
+import Alert, { AlertVariant } from '@common/Alert';
+import SocialLogin from '@common/SocialLogin';
 
 export default function EmailLogin() {
     const { t } = useTranslation();
+    const router = useRouter();
+    const [alertTitle, setAlertTitle] = useState('');
 
     const {
         register,
@@ -18,8 +25,24 @@ export default function EmailLogin() {
         resolver: zodResolver(loginSchema),
     });
 
-    const onSubmit = (data: TLoginSchema) => {
-        console.log(data);
+    const onSubmit = async (data: TLoginSchema) => {
+        try {
+            setAlertTitle('');
+            const { email, password } = data;
+            const res = await signInWithEmailPassword({ email, password });
+            const { success, message, emailVerified, user } = res;
+            console.log('res is', res);
+            if (success && emailVerified && user) {
+                // Todo: Add entry to mongoDB in BE with emailVerified as false
+                console.log('all good');;
+                localStorage.setItem('authToken', user?.uid);
+                router.replace('/');
+            } else {
+                setAlertTitle(t(message));
+            }
+        } catch (error) {
+            console.log('error in loginaaa', error);
+        }
     };
 
     return (
@@ -65,6 +88,12 @@ export default function EmailLogin() {
                     {t('signUp')}
                 </Link>
             </div>
+            {alertTitle && (
+                <div className='mt-4 mb-4'>
+                    <Alert variant={AlertVariant.Error} title={alertTitle} />
+                </div>
+            )}
+
             <div className="divider">{t('or')}</div>
             <SocialLogin />
         </div>
