@@ -1,78 +1,76 @@
 'use client';
-import { useForm } from 'react-hook-form';
-import { signupSchema } from 'shared-types';
-import type { TSignupSchema } from 'shared-types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
-import SocialLogin from '@hosts/components/common/SocialLogin';
-import { useTranslation } from 'shared-i18n';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { signUpWithEmailPassword } from 'shared-auth';
+import { useTranslation } from 'shared-i18n';
+import type { ISignupResult, TSignupSchema } from 'shared-types';
+import { signupSchema } from 'shared-types';
+
+import Alert, { AlertVariant } from '@common/Alert';
+import FormInput from '@common/FormInput';
+import SocialLogin from '@common/SocialLogin';
 
 export default function Signup() {
     const { t } = useTranslation();
+    const [alertType, setAlertType] = useState<string>('');
+    const [alertTitle, setAlertTitle] = useState<string>('');
 
     const {
         register,
         handleSubmit,
         formState: { errors, isSubmitting },
+        reset,
     } = useForm<TSignupSchema>({
         resolver: zodResolver(signupSchema),
     });
 
     const onSubmit = async (data: TSignupSchema) => {
-        console.log(data);
-        const { email, password } = data;
-        const res = await signUpWithEmailPassword(email, password);
-        console.log('res', res);
-    };
-
-    const renderError = (msg: string) => {
-        return <span className="text-error text-sm">{t(msg)}</span>;
+        setAlertTitle('');
+        setAlertType('');
+        try {
+            const { email, password } = data;
+            const res: ISignupResult = await signUpWithEmailPassword({ email, password });
+            const { success, message, user, emailVerified } = res;
+            if (success && emailVerified) {
+                // Todo: Add entry to mongoDB in BE with emailVerified as false
+                setAlertType('success');
+                setAlertTitle(t(message));
+                reset();
+            } else {
+                setAlertType('error');
+                setAlertTitle(t(message));
+            }
+        } catch (error) {
+            console.log('Error in onSubmit::signUpWithEmailPassword', error);
+        }
     };
 
     return (
         <div className="emailSignup w-full">
             <form onSubmit={handleSubmit(onSubmit)}>
                 <fieldset className="fieldset flex flex-col space-y-4">
-                    <div className="flex flex-col space-y-1">
-                        <label className="label">
-                            <span className="label-text">{t('email')}</span>
-                        </label>
-                        <input
-                            {...register('email')}
-                            type="text"
-                            className={`input w-full ${errors.email ? 'input-error' : ''}`}
-                            placeholder={t('emailPlaceholder')}
-                        />
-                        {errors.email && (
-                            renderError(errors.email.message as string)
-                        )}
-                    </div>
-
-                    <div className="flex flex-col space-y-1">
-                        <label className="label">{t('password')}</label>
-                        <input
-                            {...register('password')}
-                            type="password"
-                            className={`input w-full ${errors.password ? 'input-error' : ''}`}
-                            placeholder={t('passwordPlaceholder')}
-                        />
-                        {errors.password && (
-                            renderError(errors.password.message as string)
-                        )}
-                    </div>
-                    <div className="flex flex-col space-y-1">
-                        <label className="label">{t('confirmPassword')}</label>
-                        <input
-                            {...register('confirmPassword')}
-                            type="password"
-                            className={`input w-full ${errors.confirmPassword ? 'input-error' : ''}`}
-                            placeholder={t('passwordPlaceholder')}
-                        />
-                        {errors.confirmPassword && (
-                            renderError(errors.confirmPassword.message as string)
-                        )}
-                    </div>
+                    <FormInput
+                        label={t('email')}
+                        placeholder={t('emailPlaceholder')}
+                        error={errors.email?.message}
+                        register={register('email')}
+                    />
+                    <FormInput
+                        label={t('password')}
+                        type="password"
+                        placeholder={t('passwordPlaceholder')}
+                        error={errors.password?.message}
+                        register={register('password')}
+                    />
+                    <FormInput
+                        label={t('confirmPassword')}
+                        type="password"
+                        placeholder={t('passwordPlaceholder')}
+                        error={errors.confirmPassword?.message}
+                        register={register('confirmPassword')}
+                    />
                     <button disabled={isSubmitting} type="submit" className="btn btn-primary">
                         {isSubmitting && (<span className="loading loading-ring"></span>)}
                         {t('Signup')}
@@ -86,6 +84,11 @@ export default function Signup() {
                 </Link>
             </div>
             <div className="divider">{t('or')}</div>
+            {alertType && (
+                <div className='mt-4 mb-4'>
+                    <Alert variant={alertType as AlertVariant} title={alertTitle} />
+                </div>
+            )}
             <SocialLogin />
         </div>
     );

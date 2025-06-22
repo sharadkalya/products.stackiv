@@ -4,13 +4,13 @@ import type { NextRequest } from 'next/server';
 // throw new Error("hello error")
 
 const publicPaths = [
-    '/',
     '/login',
     '/signup',
     '/about',
 ];
 
 const protectedPaths = [
+    '/',
     '/dashboard',
     '/account',
     '/settings',

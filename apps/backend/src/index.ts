@@ -1,21 +1,34 @@
-import express from 'express';
+import cors from 'cors';
 import dotenv from 'dotenv';
+import express from 'express';
+import rateLimit from 'express-rate-limit';
+import helmet from 'helmet';
+
+import routes from './routes/index.routes';
 
 dotenv.config();
-
+// Define limiter - example: max 100 requests per 15 minutes per IP
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+    standardHeaders: true, // return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // disable the `X-RateLimit-*` headers
+});
 const app = express();
-const cors = require('cors');
 
+// Apply to all requests
+app.use(limiter);
+app.use(helmet());
 app.use(
     cors({
         origin: 'http://localhost:3001',
-    })
+        credentials: true,
+    }),
 );
-const PORT = process.env.PORT || 5001;
+app.use(express.json());
+app.use('/api', routes);
 
-app.get('/', (_req, res) => {
-    res.send('Hello World from StayInn Backend!');
-});
+const PORT = process.env.PORT || 5001;
 
 app.listen(PORT, () => {
     console.log(`🚀 Server is running on http://localhost:${PORT}`);

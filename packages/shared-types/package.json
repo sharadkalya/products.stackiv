@@ -1,7 +1,7 @@
 {
     "name": "stayinn-types",
     "version": "1.0.0",
-    "main": "dist/index.js",
+    "main": "dist/index.d.ts",
     "types": "dist/index.d.ts",
     "files": [
         "dist"
