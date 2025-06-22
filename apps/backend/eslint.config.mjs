@@ -24,6 +24,7 @@ const eslintConfig = [
             "linebreak-style": ["error", "unix"],
             "no-console": ["warn", { allow: ["warn", "error"] }],
             "camelcase": ["error", { properties: "always" }],
+            "@typescript-eslint/no-explicit-any": "off",
             "import/order": [
                 "error",
                 {

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { UserRoles } from '../types';
 
 // Define the login schema
 export const loginSchema = z.object({
@@ -29,7 +30,7 @@ export type TSignupSchema = z.infer<typeof signupSchema>;
 // API Schema
 export const SignupApiSchema = z.object({
     email: z.string().email(),
-    role: z.string(),
+    role: z.array(z.nativeEnum(UserRoles)),
     password: z.string().min(6),
-    uuid: z.string()
+    firebaseUid: z.string()
 });
