@@ -1,0 +1,23 @@
+{
+    "name": "shared-redux",
+    "version": "1.0.0",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc",
+        "clean": "rm -rf dist"
+    },
+    "dependencies": {
+        "@reduxjs/toolkit": "^2.2.0",
+        "react-redux": "^9.0.0",
+        "shared-types": "^1.0.0",
+        "shared-api": "^1.0.0"
+    },
+    "peerDependencies": {
+        "react": "^18.0.0",
+        "redux": "^4.2.0"
+    },
+    "devDependencies": {
+        "typescript": "^5.4.0"
+    }
+}

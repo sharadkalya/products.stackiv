@@ -21,7 +21,7 @@ export const signup = async (req: Request, res: Response) => {
             return;
         }
 
-        if (result.data.role.includes(UserRoles.Admin)) {
+        if (result.data.roles.includes(UserRoles.Admin)) {
             badRequest(res, 'Admin role is not allowed');
             return;
         }

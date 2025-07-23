@@ -11,9 +11,6 @@
             "@/*": [
                 "src/*"
             ],
-            "stayinn-types": [
-                "../../packages/stayinn-types/src"
-            ],
             "shared-types": [
                 "../../packages/shared-types/src"
             ],

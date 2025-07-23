@@ -14,6 +14,12 @@
             "path": "packages/shared-config"
         },
         {
+            "path": "packages/shared-redux"
+        },
+        {
+            "path": "packages/shared-api"
+        },
+        {
             "path": "apps/hosts"
         },
         {
@@ -34,6 +40,12 @@
             ],
             "shared-auth": [
                 "packages/shared-auth/src"
+            ],
+            "shared-redux": [
+                "packages/shared-redux/src"
+            ],
+            "shared-redux": [
+                "packages/shared-api/src"
             ]
         }
     }

@@ -18,14 +18,13 @@ export async function signUpWithEmailPassword(payload: IEmailAuthPayload): Promi
         const { email, password } = payload;
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
-        console.log('user', user);
 
         // Send email verification
         await sendEmailVerification(user);
 
         return {
             success: true,
-            emailVerified: true,
+            emailVerified: false,
             message: 'verificationEmailSent',
             user: {
                 uid: user.uid,
