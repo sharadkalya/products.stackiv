@@ -3,16 +3,19 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useDispatch } from 'react-redux';
 import { signUpWithEmailPassword } from 'shared-auth';
 import { useTranslation } from 'shared-i18n';
-import type { ISignupResult, TSignupSchema } from 'shared-types';
-import { signupSchema } from 'shared-types';
+import { signupAction } from 'shared-redux';
+import type { ISignupResult, SignupPayload, TSignupSchema } from 'shared-types';
+import { signupSchema, UserRoles } from 'shared-types';
 
 import Alert, { AlertVariant } from '@common/Alert';
 import FormInput from '@common/FormInput';
 import SocialLogin from '@common/SocialLogin';
 
 export default function Signup() {
+    const dispatch = useDispatch();
     const { t } = useTranslation();
     const [alertType, setAlertType] = useState<string>('');
     const [alertTitle, setAlertTitle] = useState<string>('');
@@ -32,11 +35,21 @@ export default function Signup() {
         try {
             const { email, password } = data;
             const res: ISignupResult = await signUpWithEmailPassword({ email, password });
-            const { success, message, user, emailVerified } = res;
-            if (success && emailVerified) {
+            const { success, message, user, emailVerified = false } = res;
+            console.log('res', res);
+            if (success && user && user.email) {
                 // Todo: Add entry to mongoDB in BE with emailVerified as false
                 setAlertType('success');
                 setAlertTitle(t(message));
+                const { email, uid: firebaseUid } = user;
+                const signupPayload: SignupPayload = {
+                    firebaseUid,
+                    email,
+                    emailVerified,
+                    roles: [UserRoles.Host],
+                    password,
+                };
+                await dispatch(signupAction(signupPayload));
                 reset();
             } else {
                 setAlertType('error');

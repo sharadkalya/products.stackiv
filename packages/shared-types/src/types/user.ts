@@ -9,7 +9,7 @@ export interface User {
     email: string;
     name?: string;
     emailVerified: boolean;
-    role: UserRoles[];
+    roles: UserRoles[];
     firstName?: string;
     lastName?: string;
     phoneNumber?: number;

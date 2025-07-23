@@ -12,7 +12,7 @@ const UserSchema: Schema = new Schema(
         email: { type: String, required: true, unique: true },
         name: { type: String }, // optional
         emailVerified: { type: Boolean, required: true },
-        role: {
+        roles: {
             type: [String],
             enum: Object.values(UserRoles),
             required: true,

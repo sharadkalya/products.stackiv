@@ -1,3 +1,11 @@
+import { UserRoles } from './user';
+export interface SignupPayload {
+    email: string;
+    roles: UserRoles[];
+    firebaseUid: string;
+    emailVerified: boolean;
+    password: string,
+}
 export interface IEmailAuthPayload {
     email: string;
     password: string;

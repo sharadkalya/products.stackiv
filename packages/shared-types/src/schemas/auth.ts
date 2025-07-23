@@ -30,7 +30,7 @@ export type TSignupSchema = z.infer<typeof signupSchema>;
 // API Schema
 export const SignupApiSchema = z.object({
     email: z.string().email(),
-    role: z.array(z.nativeEnum(UserRoles)),
+    roles: z.array(z.nativeEnum(UserRoles)),
     password: z.string().min(6),
     firebaseUid: z.string()
 });

@@ -15,10 +15,13 @@
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
         "react-hook-form": "^7.57.0",
+        "react-redux": "^9.2.0",
         "shared-auth": "^1.0.0",
         "shared-config": "^1.0.0",
         "shared-i18n": "^1.0.0",
         "shared-types": "^1.0.0",
+        "shared-api": "^1.0.0",
+        "shared-redux": "^1.0.0",
         "zod": "^3.25.56"
     },
     "devDependencies": {

@@ -47,7 +47,13 @@
             ],
             "shared-i18n/server": [
                 "../../packages/shared-i18n/src/server.ts"
-            ]
+            ],
+            "shared-redux": [
+                "../../packages/shared-redux/src"
+            ],
+            "shared-api": [
+                "../../packages/shared-api/src"
+            ],
         }
     },
     "include": [
