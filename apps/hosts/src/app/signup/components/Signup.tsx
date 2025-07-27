@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 import { signUpWithEmailPassword } from 'shared-auth';
 import { useTranslation } from 'shared-i18n';
-import { signupAction } from 'shared-redux';
+import { AppDispatch, signupAction } from 'shared-redux';
 import type { ISignupResult, SignupPayload, TSignupSchema } from 'shared-types';
 import { signupSchema, UserRoles } from 'shared-types';
 
@@ -15,7 +15,7 @@ import FormInput from '@common/FormInput';
 import SocialLogin from '@common/SocialLogin';
 
 export default function Signup() {
-    const dispatch = useDispatch();
+    const dispatch = useDispatch<AppDispatch>();
     const { t } = useTranslation();
     const [alertType, setAlertType] = useState<string>('');
     const [alertTitle, setAlertTitle] = useState<string>('');
@@ -36,7 +36,6 @@ export default function Signup() {
             const { email, password } = data;
             const res: ISignupResult = await signUpWithEmailPassword({ email, password });
             const { success, message, user, emailVerified = false } = res;
-            console.log('res', res);
             if (success && user && user.email) {
                 // Todo: Add entry to mongoDB in BE with emailVerified as false
                 setAlertType('success');

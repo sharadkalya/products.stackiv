@@ -1,4 +1,4 @@
-import { createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { ISignupResult, IEmailAuthPayload } from "shared-types";
 import { auth } from './init';
 
@@ -61,6 +61,7 @@ export async function signInWithEmailPassword(payload: IEmailAuthPayload): Promi
         if (!user.emailVerified) {
             await sendEmailVerification(user);
         }
+        const accessToken = await user.getIdToken();
         return {
             success: true,
             emailVerified: user.emailVerified,
@@ -68,6 +69,7 @@ export async function signInWithEmailPassword(payload: IEmailAuthPayload): Promi
             user: {
                 uid: user.uid,
                 email: user.email,
+                accessToken,
             },
         };
     } catch (error: any) {
@@ -81,5 +83,13 @@ export async function signInWithEmailPassword(payload: IEmailAuthPayload): Promi
             success: false,
             message: error.message ?? 'couldntLoginUser',
         };
+    }
+}
+
+export async function firebaseLogout() {
+    try {
+        await signOut(auth);
+    } catch (error) {
+        console.error('Error signing out:', error);
     }
 }

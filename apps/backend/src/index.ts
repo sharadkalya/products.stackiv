@@ -1,3 +1,4 @@
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
@@ -19,12 +20,15 @@ const limiter = rateLimit({
 const app = express();
 
 // Apply to all requests
+
+app.use(cookieParser());
 app.use(limiter);
 app.use(helmet());
 app.use(
     cors({
         origin: 'http://localhost:3001',
         credentials: true,
+        exposedHeaders: ['Authorization'],
     }),
 );
 app.use(express.json());
