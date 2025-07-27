@@ -1,7 +1,6 @@
 // middleware.ts
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-// throw new Error("hello error")
 
 const publicPaths = [
     '/login',
@@ -23,18 +22,24 @@ function pathMatches(path: string, paths: string[]) {
 
 export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
-    console.log('middleware invoked');
+    const token = request.cookies.get('Authorization');
+
+    const isPublic = pathMatches(pathname, publicPaths);
+    const isProtected = pathMatches(pathname, protectedPaths);
+
+    // Redirect authenticated users away from login/signup
+    if (token && (pathname === '/login' || pathname === '/signup')) {
+        return NextResponse.redirect(new URL('/', request.url));
+    }
+
     // Allow public paths without auth
-    if (pathMatches(pathname, publicPaths)) {
+    if (isPublic) {
         return NextResponse.next();
     }
 
-    // If path matches protected paths, check auth
-    if (pathMatches(pathname, protectedPaths)) {
-        const token = request.cookies.get('authToken');
-        if (!token) {
-            return NextResponse.redirect(new URL('/login', request.url));
-        }
+    // Require token for protected paths
+    if (isProtected && !token) {
+        return NextResponse.redirect(new URL('/login', request.url));
     }
 
     // Default: allow

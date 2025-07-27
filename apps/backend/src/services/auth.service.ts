@@ -9,3 +9,11 @@ export const createUser = async (userData: UserType) => {
 export const findUserByFirebaseUid = async (firebaseUid: string) => {
     return await User.findOne({ firebaseUid });
 };
+
+export const updateUserByFirebaseUid = async (firebaseUid: string, updateData: Partial<UserType>): Promise<UserType | null> => {
+    return await User.findOneAndUpdate(
+        { firebaseUid },
+        updateData,
+        { new: true },
+    );
+};

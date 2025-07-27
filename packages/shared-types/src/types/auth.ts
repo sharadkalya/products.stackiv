@@ -6,6 +6,13 @@ export interface SignupPayload {
     emailVerified: boolean;
     password: string,
 }
+
+export interface LoginPayload {
+    email: string;
+    firebaseUid: string;
+    firebaseAccessToken: string;
+    password: string,
+}
 export interface IEmailAuthPayload {
     email: string;
     password: string;
@@ -20,5 +27,6 @@ export interface ISignupResult {
     user?: {
         uid: string;
         email: string | null;
+        accessToken?: string | null
     };
 }

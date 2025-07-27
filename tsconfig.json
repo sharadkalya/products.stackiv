@@ -44,7 +44,7 @@
             "shared-redux": [
                 "packages/shared-redux/src"
             ],
-            "shared-redux": [
+            "shared-api": [
                 "packages/shared-api/src"
             ]
         }

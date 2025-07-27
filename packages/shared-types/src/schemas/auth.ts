@@ -5,6 +5,12 @@ import { UserRoles } from '../types';
 export const loginSchema = z.object({
     email: z.string().email(),
     password: z.string(),
+    firebaseUid: z.string(),
+    firebaseAccessToken: z.string(),
+});
+export const loginFormSchema = z.object({
+    email: z.string().email(),
+    password: z.string(),
 });
 
 // Define the signup schema
@@ -25,6 +31,7 @@ export const signupSchema = z.object({
 
 // Define the types for the login and signup schemas
 export type TLoginSchema = z.infer<typeof loginSchema>;
+export type TLoginFormSchema = z.infer<typeof loginFormSchema>;
 export type TSignupSchema = z.infer<typeof signupSchema>;
 
 // API Schema

@@ -14,6 +14,9 @@
     "references": [
         {
             "path": "../shared-types",
+        },
+        {
+            "path": "../shared-api",
         }
     ],
     "include": [

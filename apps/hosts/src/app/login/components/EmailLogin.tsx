@@ -4,15 +4,18 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useDispatch } from 'react-redux';
 import { signInWithEmailPassword } from 'shared-auth';
 import { useTranslation } from 'shared-i18n';
-import { loginSchema } from 'shared-types';
-import type { TLoginSchema } from 'shared-types';
+import { AppDispatch, loginAction } from 'shared-redux';
+import { loginFormSchema } from 'shared-types';
+import type { LoginPayload, TLoginFormSchema } from 'shared-types';
 
 import Alert, { AlertVariant } from '@common/Alert';
 import SocialLogin from '@common/SocialLogin';
 
 export default function EmailLogin() {
+    const dispatch = useDispatch<AppDispatch>();
     const { t } = useTranslation();
     const router = useRouter();
     const [alertTitle, setAlertTitle] = useState('');
@@ -21,27 +24,30 @@ export default function EmailLogin() {
         register,
         handleSubmit,
         formState: { errors, isSubmitting },
-    } = useForm<TLoginSchema>({
-        resolver: zodResolver(loginSchema),
+    } = useForm<TLoginFormSchema>({
+        resolver: zodResolver(loginFormSchema),
     });
 
-    const onSubmit = async (data: TLoginSchema) => {
+    const onSubmit = async (data: TLoginFormSchema) => {
         try {
             setAlertTitle('');
             const { email, password } = data;
             const res = await signInWithEmailPassword({ email, password });
             const { success, message, emailVerified, user } = res;
-            console.log('res is', res);
-            if (success && emailVerified && user) {
-                // Todo: Add entry to mongoDB in BE with emailVerified as false
-                console.log('all good');;
-                localStorage.setItem('authToken', user?.uid);
+            if (success && emailVerified && user && user.email && user.accessToken) {
+                const action: LoginPayload = {
+                    email: user.email,
+                    firebaseUid: user.uid,
+                    firebaseAccessToken: user.accessToken,
+                    password,
+                };
+                await dispatch(loginAction(action));
                 router.replace('/');
             } else {
                 setAlertTitle(t(message));
             }
         } catch (error) {
-            console.log('error in loginaaa', error);
+            console.log('error in login', error);
         }
     };
 
