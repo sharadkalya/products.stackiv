@@ -13,10 +13,10 @@
     },
     "references": [
         {
-            "path": "../shared-types",
+            "path": "../shared-types"
         },
         {
-            "path": "../shared-api",
+            "path": "../shared-api"
         }
     ],
     "include": [
