@@ -13,6 +13,7 @@ import type { LoginPayload, TLoginFormSchema } from 'shared-types';
 
 import Alert, { AlertVariant } from '@common/Alert';
 import SocialLogin from '@common/SocialLogin';
+import { logMsg } from '@hosts/utils/logUtility';
 
 export default function EmailLogin() {
     const dispatch = useDispatch<AppDispatch>();
@@ -47,7 +48,7 @@ export default function EmailLogin() {
                 setAlertTitle(t(message));
             }
         } catch (error) {
-            console.log('error in login', error);
+            logMsg('EmailLogin', 'error in login', error);
         }
     };
 

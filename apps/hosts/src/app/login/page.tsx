@@ -1,6 +1,7 @@
+import { getServerTranslation } from 'shared-i18n/server';
+
 import EmailLogin from './components/EmailLogin';
 import PhoneLogin from './components/PhoneLogin';
-import { getServerTranslation } from 'shared-i18n/server';
 
 export default async function Login() {
     const { t } = await getServerTranslation('en');

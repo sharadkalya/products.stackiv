@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { getDashboardData } from 'shared-api';
 
 import LogoutButton from '@common/LogoutButton';
+import { logMsg } from '@hosts/utils/logUtility';
 
 export default async function Home() {
     const cookieStore = await cookies();
@@ -10,7 +11,7 @@ export default async function Home() {
     const cookie = authorization ? `Authorization=${authorization.value}` : '';
     const res = await getDashboardData(cookie);
 
-    console.log('Respone of dashboard', res);
+    logMsg('Home component', 'Respone of dashboard', res);
 
     return (
         <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">

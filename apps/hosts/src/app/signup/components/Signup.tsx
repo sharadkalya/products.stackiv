@@ -13,6 +13,7 @@ import { signupSchema, UserRoles } from 'shared-types';
 import Alert, { AlertVariant } from '@common/Alert';
 import FormInput from '@common/FormInput';
 import SocialLogin from '@common/SocialLogin';
+import { logMsg } from '@hosts/utils/logUtility';
 
 export default function Signup() {
     const dispatch = useDispatch<AppDispatch>();
@@ -55,7 +56,7 @@ export default function Signup() {
                 setAlertTitle(t(message));
             }
         } catch (error) {
-            console.log('Error in onSubmit::signUpWithEmailPassword', error);
+            logMsg('Signup component', 'Error in onSubmit::signUpWithEmailPassword', error);
         }
     };
 
