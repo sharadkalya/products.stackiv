@@ -53,7 +53,7 @@
             ],
             "shared-api": [
                 "../../packages/shared-api/src"
-            ],
+            ]
         }
     },
     "include": [

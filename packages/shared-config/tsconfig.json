@@ -6,7 +6,8 @@
         "outDir": "dist",
         "esModuleInterop": true,
         "jsx": "react-jsx",
-        "strict": true
+        "strict": true,
+        "composite": true
     },
     "include": [
         "src"
