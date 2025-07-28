@@ -1,4 +1,11 @@
-import { createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import {
+    createUserWithEmailAndPassword,
+    sendEmailVerification,
+    signInWithEmailAndPassword,
+    signOut,
+    GoogleAuthProvider,
+    signInWithPopup
+} from 'firebase/auth';
 import { ISignupResult, IEmailAuthPayload } from "shared-types";
 import { auth } from './init';
 
@@ -91,5 +98,38 @@ export async function firebaseLogout() {
         await signOut(auth);
     } catch (error) {
         console.error('Error signing out:', error);
+    }
+}
+
+export async function signInViaGoogle(): Promise<ISignupResult> {
+    try {
+        const provider = new GoogleAuthProvider();
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        const accessToken = await user.getIdToken();
+
+        return {
+            success: true,
+            emailVerified: user.emailVerified,
+            message: 'loginSuccess',
+            user: {
+                uid: user.uid,
+                email: user.email,
+                accessToken,
+            },
+        };
+    } catch (error: any) {
+        console.error('Error in signInViaGoogle:', error);
+
+        if (error?.message?.includes('popup-closed-by-user')) {
+            return {
+                success: false,
+                message: 'popupClosedByUser',
+            };
+        }
+        return {
+            success: false,
+            message: error.message ?? 'couldntLoginUser',
+        };
     }
 }

@@ -1,13 +1,42 @@
+'use client';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useDispatch } from 'react-redux';
+import { signInViaGoogle } from 'shared-auth';
 import { useTranslation } from 'shared-i18n';
+import { AppDispatch, loginAction } from 'shared-redux';
+import { ISignupResult, LoginPayload } from 'shared-types';
 
 export default function SocialLogin() {
     const { t } = useTranslation();
+    const dispatch = useDispatch<AppDispatch>();
+    const router = useRouter();
+
+    const forwardResponse = async (res: ISignupResult) => {
+        const { success, emailVerified, user } = res;
+        if (success && emailVerified && user && user.email && user.accessToken) {
+            const action: LoginPayload = {
+                email: user.email,
+                firebaseUid: user.uid,
+                firebaseAccessToken: user.accessToken,
+                password: 'ignorePassword',
+            };
+            await dispatch(loginAction(action));
+            router.replace('/');
+        }
+
+    };
+
+    const googleSignIn = async () => {
+        const res = await signInViaGoogle();
+        forwardResponse(res);
+    };
+
     return (
         <div className="socialLogin w-full">
             <p className='text-center mb-4'>{t('loginWithSocial')}</p>
             <div className='flex gap-2 justify-center'>
-                <button className="btn">
+                <button className="btn" onClick={googleSignIn}>
                     <Image
                         src="icons/google.svg"
                         alt="Google logo"
