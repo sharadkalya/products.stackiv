@@ -19,6 +19,9 @@ const limiter = rateLimit({
 });
 const app = express();
 
+// Use FRONTEND_URL env var here
+const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+
 // Apply to all requests
 
 app.use(cookieParser());
@@ -26,7 +29,7 @@ app.use(limiter);
 app.use(helmet());
 app.use(
     cors({
-        origin: 'http://localhost:3001',
+        origin: frontendUrl,
         credentials: true,
         exposedHeaders: ['Authorization'],
     }),
