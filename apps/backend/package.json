@@ -6,7 +6,7 @@
     "scripts": {
         "dev": "ts-node-dev --respawn --transpile-only --ignore-watch node_modules --require tsconfig-paths/register src/index.ts",
         "build": "tsc -b",
-        "start": "ts-node -r tsconfig-paths/register src/index.ts"
+        "start": "node --max-old-space-size=512 -r ts-node/register -r tsconfig-paths/register src/index.ts"
     },
     "dependencies": {
         "accesscontrol": "^2.2.1",
