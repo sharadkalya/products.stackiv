@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { UserRoles } from 'shared-types';
 
+import { AuthenticatedRequest } from '@/types/auth';
+
 export interface JwtPayload {
     firebaseUid: string;
     email: string;
@@ -20,7 +22,7 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
 
     try {
         const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
-        req.user = decoded;
+        (req as AuthenticatedRequest).user = decoded;
         next();
     } catch (err) {
         res.status(401).json({ message: 'Invalid or expired token', err });

@@ -5432,11 +5432,6 @@ sha.js@^2.4.11:
     inherits "^2.0.1"
     safe-buffer "^5.0.1"
 
-shared-types@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/shared-types/-/shared-types-1.0.0.tgz#480c76f24a59c760681ebfc099ca26e417d5a697"
-  integrity sha512-07KWxU/WXpbJkff03Wp2CpnoU+7Qs9Rmu+y9ooieVCX4nVa/nOfnbrhyefwvuxdlTfftWI0Vrs9Qm/4Xna+tQg==
-
 sharp@^0.34.1:
   version "0.34.2"
   resolved "https://registry.yarnpkg.com/sharp/-/sharp-0.34.2.tgz#648bd639854dbe48047b0b420213c186d036b32d"

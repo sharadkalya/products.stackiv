@@ -10,6 +10,9 @@
         "composite": true,
         "baseUrl": "./",
         "paths": {
+            "@/middleware*": [
+                "src/middleware/*"
+            ],
             "@/*": [
                 "src/*"
             ],
