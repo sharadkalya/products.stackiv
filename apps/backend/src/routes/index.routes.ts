@@ -1,9 +1,9 @@
 import { Router } from 'express';
 
+import { authenticateJWT } from '@/middleware/jwt.middleware';
+
 import authRoutes from './auth.routes';
 import dashboardRoutes from './dashboard.routes';
-
-import { authenticateJWT } from '@/middleware/jwt.middleware';
 
 const router: Router = Router();
 

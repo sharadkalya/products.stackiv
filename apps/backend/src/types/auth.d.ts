@@ -6,6 +6,6 @@ export interface AuthenticatedRequest extends Request {
     user: JwtPayload & {
         email: string;
         firebaseUid: string;
-        roles?: UserRoles;
+        roles?: UserRoles[];
     };
 }

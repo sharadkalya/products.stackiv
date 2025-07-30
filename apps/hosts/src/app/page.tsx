@@ -1,14 +1,12 @@
-import { cookies } from 'next/headers';
 import Image from 'next/image';
 import { getDashboardData } from 'shared-api';
 
 import LogoutButton from '@common/LogoutButton';
+import { getServerCookies } from '@hosts/utils/cookiesUtil';
 import { logMsg } from '@hosts/utils/logUtility';
 
 export default async function Home() {
-    const cookieStore = await cookies();
-    const authorization = cookieStore.get('Authorization');
-    const cookie = authorization ? `Authorization=${authorization.value}` : '';
+    const cookie = await getServerCookies();
     const res = await getDashboardData(cookie);
 
     logMsg('Home component', 'Respone of dashboard', res);

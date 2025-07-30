@@ -1,11 +1,12 @@
 import { Router, Router as ExpressRouter } from 'express';
 
-import { login, logout, signup } from '../controllers/auth.controller';
+import { login, loginViaGoogle, logout, signup } from '../controllers/auth.controller';
 
 const router: ExpressRouter = Router();
 
 router.post('/signup', signup);
 router.post('/login', login);
+router.post('/loginViaGoogle', loginViaGoogle);
 router.post('/logout', logout);
 
 export default router;

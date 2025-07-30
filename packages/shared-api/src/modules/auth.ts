@@ -13,6 +13,12 @@ export async function login(payload: LoginPayload): Promise<User> {
     return response.data as User;
 }
 
+export async function loginViaGoogle(payload: LoginPayload): Promise<User> {
+    const response = await axios.post(`${API_BASE_URL}/auth/loginViaGoogle`, payload, { withCredentials: true });
+    return response.data as User;
+}
+
+
 export async function logout() {
     const response = await axios.post(`${API_BASE_URL}/auth/logout`, {}, { withCredentials: true });
     return response.data;

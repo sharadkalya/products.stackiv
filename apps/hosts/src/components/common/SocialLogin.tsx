@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { signInViaGoogle } from 'shared-auth';
 import { useTranslation } from 'shared-i18n';
-import { AppDispatch, loginAction } from 'shared-redux';
+import { AppDispatch, loginViaGoogleAction } from 'shared-redux';
 import { ISignupResult, LoginPayload } from 'shared-types';
 
 export default function SocialLogin() {
@@ -21,7 +21,7 @@ export default function SocialLogin() {
                 firebaseAccessToken: user.accessToken,
                 password: 'ignorePassword',
             };
-            await dispatch(loginAction(action));
+            await dispatch(loginViaGoogleAction(action));
             router.replace('/');
         }
 
@@ -45,7 +45,7 @@ export default function SocialLogin() {
                         className="dark:invert"
                     />
                 </button>
-                <button className="btn">
+                {/* <button className="btn">
                     <Image
                         src="icons/fb.svg"
                         alt="Facebook logo"
@@ -53,7 +53,7 @@ export default function SocialLogin() {
                         height={20}
                         className="dark:invert"
                     />
-                </button>
+                </button> */}
             </div>
         </div>
     );

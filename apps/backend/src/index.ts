@@ -23,7 +23,6 @@ const app = express();
 const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
 
 // Apply to all requests
-
 app.use(cookieParser());
 app.use(limiter);
 app.use(helmet());
