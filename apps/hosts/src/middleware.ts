@@ -1,10 +1,12 @@
 /* eslint-disable no-console */
+
 import jwt from 'jsonwebtoken';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const publicPaths = ['/login', '/signup', '/about'];
-const protectedPaths = ['/', '/dashboard', '/account', '/settings'];
+const publicPaths = ['/', '/login', '/signup', '/about'];
+const protectedPaths = ['/dashboard', '/account', '/settings'];
+const isProd = process.env.NODE_ENV === 'production';
 
 const isPathMatch = (pathname: string, paths: string[]) =>
     paths.some((p) => pathname === p || pathname.startsWith(`${p}/`));
@@ -52,6 +54,7 @@ export function middleware(request: NextRequest) {
             response.cookies.set('Authorization', '', {
                 path: '/',
                 expires: new Date(0), // Expire immediately
+                domain: isProd ? '.stackiv.com' : undefined, // Add domain for prod
             });
 
             return response;

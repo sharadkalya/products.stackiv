@@ -24,5 +24,13 @@
     "verificationEmailSent": "Please verify your email and then login",
     "couldntLoginUser": "Couldn't login user, try later",
     "success": "Success",
-    "invalidCredentials": "Invalid credentials"
+    "invalidCredentials": "Invalid credentials",
+    "stackivDocsTitle": "From Docs or PDFs to Prep in Seconds.",
+    "stackivDocsSubtitle": "Transform research papers, textbooks, or notes into structured learning tools with one upload.",
+    "stackivDocsButton": "Use StackivDocs AI",
+    "stackivDocsHeading": "StackivDocs AI",
+    "stackivChartsTitle": "Create charts with the help of AI",
+    "stackivChartsSubtitle": "Transform stats to charts",
+    "stackivChartsButton": "Use StackivCharts AI",
+    "stackivChartsHeading": "StackivCharts AI"
 }
