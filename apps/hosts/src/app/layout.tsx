@@ -4,6 +4,8 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { APP_NAME } from 'shared-config';
 
+import CommonLayout from '../components/CommonLayout';
+
 import App from './App';
 
 const geistSans = Geist({
@@ -31,7 +33,9 @@ export default function RootLayout({
             <body
                 className={`${geistSans.variable} ${geistMono.variable} antialiased`}
             >
-                <App>{children}</App>
+                <App>
+                    <CommonLayout>{children}</CommonLayout>
+                </App>
             </body>
         </html>
     );
