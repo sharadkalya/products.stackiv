@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { logout } from 'shared-api';
 import { firebaseLogout } from 'shared-auth';
 
+import { FullScreenLoader } from './FullScreenLoader';
+
 export default function LogoutButton() {
     const [loading, setLoading] = useState(false);
 
@@ -27,9 +29,7 @@ export default function LogoutButton() {
     return (
         <>
             {loading && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="loading loading-spinner loading-lg text-white"></div>
-                </div>
+                <FullScreenLoader>Logging out</FullScreenLoader>
             )}
 
             <button

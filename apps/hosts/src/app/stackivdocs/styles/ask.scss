@@ -1,0 +1,49 @@
+/* Paragraph Styling */
+p {
+    margin-bottom: 1rem; /* Adjust spacing between paragraphs */
+    line-height: 1.6; /* Ensure readability with proper line spacing */
+}
+
+/* Headings Styling */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    font-weight: 600; /* Tailwind's default font-weight is fine for headings */
+}
+
+/* Unordered List (ul) */
+ul {
+    padding-left: 1.25rem; /* Indent list items properly */
+    margin-bottom: 1rem; /* Space after the list */
+    list-style-type: disc; /* Dots for unordered lists */
+}
+
+ul li {
+    margin-bottom: 0.5rem; /* Space between list items */
+    line-height: 1.5; /* Improve readability */
+}
+
+/* Ordered List (ol) */
+ol {
+    padding-left: 1.25rem; /* Indent list items properly */
+    margin-bottom: 1rem; /* Space after the list */
+    list-style-type: decimal; /* Numbers for ordered lists */
+}
+
+ol li {
+    margin-bottom: 0.5rem; /* Space between list items */
+    line-height: 1.5; /* Improve readability */
+}
+
+/* Additional List Support for Nested Lists */
+ul ul,
+ol ul,
+ul ol,
+ol ol {
+    padding-left: 1.5rem; /* Indent nested lists */
+}

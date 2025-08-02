@@ -20,6 +20,7 @@ export default function EmailLogin() {
     const { t } = useTranslation();
     const router = useRouter();
     const [alertTitle, setAlertTitle] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
     const {
         register,
@@ -31,6 +32,7 @@ export default function EmailLogin() {
 
     const onSubmit = async (data: TLoginFormSchema) => {
         try {
+            setIsLoading(true);
             setAlertTitle('');
             const { email, password } = data;
             const res = await signInWithEmailPassword({ email, password });
@@ -49,6 +51,8 @@ export default function EmailLogin() {
             }
         } catch (error) {
             logMsg('EmailLogin', 'error in login', error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -84,7 +88,7 @@ export default function EmailLogin() {
                         )}
                     </div>
                     <button disabled={isSubmitting} type="submit" className="btn btn-primary">
-                        {isSubmitting && (<span className="loading loading-ring"></span>)}
+                        {(isSubmitting || isLoading) && (<span className="loading loading-ring"></span>)}
                         {t('login')}
                     </button>
                 </fieldset>

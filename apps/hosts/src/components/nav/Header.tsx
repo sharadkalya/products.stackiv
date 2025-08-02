@@ -13,6 +13,7 @@ export default function Header() {
     const [menuOpen, setMenuOpen] = useState(false);
 
     const handleLoginClick = () => {
+        setMenuOpen(false);
         router.push('/login');
     };
 

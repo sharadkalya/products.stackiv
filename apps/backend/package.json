@@ -9,8 +9,10 @@
         "start": "node --max-old-space-size=512 -r ts-node/register -r tsconfig-paths/register src/index.ts"
     },
     "dependencies": {
+        "@pinecone-database/pinecone": "^6.1.2",
         "accesscontrol": "^2.2.1",
         "apollo-server-express": "^3.13.0",
+        "compromise": "^14.14.4",
         "cookie-parser": "^1.4.7",
         "cors": "^2.8.5",
         "dotenv": "^16.5.0",
@@ -21,6 +23,7 @@
         "helmet": "^8.1.0",
         "jsonwebtoken": "^9.0.2",
         "mongoose": "^8.15.1",
+        "openai": "^5.11.0",
         "shared-types": "^1.0.0",
         "tsconfig-paths": "^4.2.0",
         "zod": "^3.25.67"

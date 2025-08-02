@@ -32,5 +32,17 @@
     "stackivChartsTitle": "Create charts with the help of AI",
     "stackivChartsSubtitle": "Transform stats to charts",
     "stackivChartsButton": "Use StackivCharts AI",
-    "stackivChartsHeading": "StackivCharts AI"
+    "stackivChartsHeading": "StackivCharts AI",
+    "stackivDocsPage": {
+        "title": "StackivDocs AI",
+        "description": "StackivDocs AI helps you upload documents, summarise them, critique them, generate Q&A, prep for sessions, and much more.",
+        "uploadInstructions": "To use, upload a PDF file or paste/type your content below.",
+        "dragAndDrop": "Drag & drop a PDF here, or click to select file",
+        "uploadPdfButton": "Upload PDF",
+        "uploadButton": "Upload",
+        "sendButton": "Send",
+        "divider": "OR",
+        "placeholder": "Paste or type your content here (max 20,000 characters)",
+        "clearFileAria": "Clear file"
+    }
 }
