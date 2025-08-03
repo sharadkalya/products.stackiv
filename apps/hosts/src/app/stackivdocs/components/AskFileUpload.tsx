@@ -4,14 +4,7 @@ import { useCallback, useState, useRef } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useTranslation } from 'shared-i18n';
 
-import { ProcessUploadType } from '../Ask';
-
-interface IAskFileUpload {
-    processUpload: ProcessUploadType
-};
-
-export function AskFileUpload(props: IAskFileUpload) {
-    const { processUpload } = props;
+export function AskFileUpload() {
     const { t } = useTranslation();
     const [file, setFile] = useState<File | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -36,17 +29,13 @@ export function AskFileUpload(props: IAskFileUpload) {
         fileInputRef.current?.click();
     };
 
-    const handleSend = () => {
-        processUpload();
-    };
-
     return (
         <div className="w-full">
             <div {...getRootProps()} className={`border-2 border-dashed rounded-lg p-6 w-full cursor-pointer transition ${isDragActive ? 'border-primary bg-base-200' : 'border-base-300 bg-base-100'}`}>
                 <input {...getInputProps()} ref={fileInputRef} />
                 <div className="flex flex-col items-center">
                     {file ? (
-                        <div className="flex items-center gap-2 bg-base-200 px-3 py-1 rounded-lg shadow w-full justify-between">
+                        <div className="flex items-center gap-2 bg-base-200 p-5 rounded-lg shadow w-full justify-between capitalize">
                             <span className="font-medium text-base-content truncate max-w-[180px]">{file.name}</span>
                             <button
                                 type="button"
@@ -73,17 +62,6 @@ export function AskFileUpload(props: IAskFileUpload) {
                         </>
                     )}
                 </div>
-            </div>
-            {/* Upload button below dropzone */}
-            <div className="flex justify-end mt-2">
-                <button
-                    className="btn btn-primary btn-sm"
-                    onClick={handleSend}
-                    disabled={!file}
-                    aria-label="Upload file"
-                >
-                    {t('stackivDocsPage.uploadButton')}
-                </button>
             </div>
         </div>
     );

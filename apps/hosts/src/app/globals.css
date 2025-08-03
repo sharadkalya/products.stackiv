@@ -2,5 +2,5 @@
 @import "tw-animate-css";
 
 @plugin "daisyui" {
-    themes: all;
+    themes: light --default, dark --prefersdark, cupcake;
 }
