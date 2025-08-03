@@ -7,7 +7,7 @@ import { Separator } from './components/Separator';
 import { useAsk } from './hooks/useAsk';
 import './styles/ask.scss';
 
-export type ProcessUploadType = (params?: { text?: string; file?: unknown }) => void;
+export type ProcessUploadType = (_params?: { text?: string; file?: unknown }) => void;
 
 export function Ask() {
     const { fetchByText, result, error } = useAsk();

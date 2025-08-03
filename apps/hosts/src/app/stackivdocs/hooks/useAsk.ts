@@ -82,8 +82,6 @@ export const useAsk = () => {
             }
 
             const firstChunk = decoder.decode(firstValue);
-            // Put first chunk back to buffer for full parsing
-            const chunks = [firstChunk];
 
             // Simple heuristic: if first chunk starts with '{' or '[' → NDJSON else raw text
             const isNDJSON = firstChunk.trim().startsWith('{') || firstChunk.trim().startsWith('[');
