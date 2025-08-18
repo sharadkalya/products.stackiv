@@ -34,7 +34,7 @@ export default function Header() {
     };
 
     return (
-        <header className="w-full bg-base-200 shadow-md px-4 py-2 flex items-center justify-between relative">
+        <header className="w-full bg-base-200 shadow-md px-5 py-4 md:px-10 md:py-5 flex items-center justify-between relative">
             {/* Brand */}
             <div className="flex items-center">
                 <Link

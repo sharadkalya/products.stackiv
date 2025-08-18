@@ -1,4 +1,6 @@
 'use client';
+import { selectAskQuery, useAppSelector } from 'shared-redux';
+
 import { MarkdownRenderer } from '@common/MarkdownRenderer';
 
 import { AskFeatures } from './components/AskFeatures';
@@ -11,8 +13,10 @@ import './styles/ask.scss';
 
 export function Ask() {
     const { fetchByText, result, error } = useAsk();
+    const query = useAppSelector(selectAskQuery);
+    console.log('query', query);
     const processUploaded = () => {
-        fetchByText({ prompt: 'text' });
+        fetchByText({ prompt: query });
     };
 
     return (

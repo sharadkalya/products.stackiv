@@ -37,9 +37,9 @@ export const AskFeatures = () => {
                 <div
                     key={feature.id}
                     onClick={() => router.push(`${pathname}${feature.path}`)}
-                    className="p-10 pt-1 shadow-lg bg-base-100 cursor-pointer hover:bg-base-200 transition-colors"
+                    className="p-10 pb-5 pt-1 shadow-lg bg-base-100 cursor-pointer hover:bg-base-200 transition-colors flex flex-col justify-between"
                 >
-                    <h2 className="font-bold text-lg pt-0 mb-4 mt-3">{feature.title}</h2>
+                    <h2 className="font-bold text-lg pt-0 mb-10 mt-3">{feature.title}</h2>
                     <p className="text-sm text-gray-500">{feature.subtitle}</p>
                 </div>
             ))}

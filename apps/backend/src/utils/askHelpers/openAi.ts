@@ -19,7 +19,7 @@ type OpenAiConfigType = {
     embeddingModel: string;
 };
 
-const getOpenAiConfig = (provider: string): OpenAiConfigType => {
+export const getOpenAiConfig = (provider = aiProviders.cohere): OpenAiConfigType => {
     switch (provider) {
         case aiProviders.groq:
             return {
@@ -52,16 +52,27 @@ const openai = new OpenAI({
     baseURL: openAiConfig.baseUrl,
 });
 
-export const callOpenAI = async (res: Response, text: string, vectorRes?: QueryResponse<RecordMetadata>) => {
+export const callOpenAI = async (res: Response, text: string, vectorRes?: QueryResponse<RecordMetadata>): Promise<string | null> => {
     const topMatches = vectorRes?.matches?.map((match: any) => match.metadata?.text).join('\n');
+    let completeResponse = '';
 
     try {
+        // If no matches found, return a direct response
+        if (!topMatches || !topMatches.trim()) {
+            const noContentResponse = "Sorry, the uploaded documents do not contain relevant information to answer this query.";
+            res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+            res.write(noContentResponse); // Immediate response
+            res.end();
+            return noContentResponse; // Return for storage or logging
+        }
+
+        // Proceed with generating the OpenAI response if matches are found
         const stream = await openai.chat.completions.create({
             model: openAiConfig.llmModel,
             messages: [
                 {
-                    role: 'system',
-                    content: 'You are an AI assistant that helps answer questions based on uploaded documents and Or research papers.',
+                    "role": "system",
+                    "content": "You are an AI assistant that answers questions based **exclusively** on the information in the provided documents and/or research papers. If the documents do not contain the information needed to answer the user's question, you must politely inform them and **do not speculate, invent, or infer information**. Clearly state that there is insufficient data to answer the question if the documents do not cover the requested topic."
                 },
                 {
                     role: 'user',
@@ -77,15 +88,20 @@ export const callOpenAI = async (res: Response, text: string, vectorRes?: QueryR
         for await (const chunk of stream) {
             const content = chunk.choices?.[0]?.delta?.content;
             if (content) {
-                res.write(content);
+                completeResponse += content; // Collect the complete response
+                res.write(content); // Stream to client
             }
         }
+
         res.end();
+        return completeResponse; // Return the complete response for storage
+
     } catch (error) {
+        console.error('Error in callOpenAI:', error);
         internalError(res, undefined, {
             error,
         });
-        return;
+        return null;
     }
 };
 
