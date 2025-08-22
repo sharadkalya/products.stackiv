@@ -42,6 +42,14 @@ const InteractionsSchema: Schema = new Schema(
             type: String,
             required: false,
         },
+        summary: {
+            type: String,
+            required: false,
+        },
+        faq: {
+            type: String,
+            required: false,
+        },
     },
     { timestamps: true },
 );

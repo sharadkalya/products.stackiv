@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 
-import { createInteraction, queryVector, storeInVector, updateInteraction, createMessage, updateMessage } from '@/services/ask.service';
+import { createInteraction, queryVector, storeInVector, updateInteraction, createMessage, updateMessage, getInteractionById, updateInteractionWithContent } from '@/services/ask.service';
 import { callOllama } from '@/utils/askHelpers/ollama';
 import { aiProviders, callOpenAI } from '@/utils/askHelpers/openAi';
 import { generateGuestUserId } from '@/utils/commonHelper';
@@ -100,8 +100,12 @@ export const query = async (req: Request, res: Response): Promise<void> => {
             }
 
         } else if (llmProvider === aiProviders.openai) {
-            // Call OpenAI and get the complete response
-            const openAIResponse = await callOpenAI(res, query, vectorQueryRes);
+            // Call OpenAI with new object-based parameters
+            const openAIResponse = await callOpenAI({
+                res,
+                text: query,
+                vectorRes: vectorQueryRes,
+            });
 
             // Update message with complete response once OpenAI is done
             if (messageId && openAIResponse) {
@@ -228,4 +232,102 @@ export const ingestText = async (req: Request, res: Response): Promise<void> => 
             error,
         });
     }
+};
+
+interface ContentGenerationConfig {
+    contentType: 'summary' | 'faq';
+    prompt: string;
+    errorMessage: string;
+}
+
+const generateContent = async (req: Request, res: Response, config: ContentGenerationConfig): Promise<void> => {
+    try {
+        const { interactionId } = req.body;
+
+        // Validate request payload
+        if (!interactionId || typeof interactionId !== 'string') {
+            badRequest(res, 'Invalid request', {
+                error: { message: 'interactionId field missing or invalid' },
+            });
+            return;
+        }
+
+        // Fetch interaction from database
+        const interaction = await getInteractionById(interactionId);
+
+        if (!interaction) {
+            badRequest(res, 'Invalid request', {
+                error: { message: 'Interaction not found' },
+            });
+            return;
+        }
+
+        // Check if content already exists and stream it
+        const existingContent = interaction[config.contentType];
+        if (existingContent) {
+            res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+            res.setHeader('Transfer-Encoding', 'chunked');
+            res.write(existingContent);
+            res.end();
+            return;
+        }
+
+        // Check if parsedText exists
+        if (
+            !interaction.parsedText ||
+            typeof interaction.parsedText !== 'string' ||
+            interaction.parsedText.trim() === ''
+        ) {
+            badRequest(res, 'Invalid request', {
+                error: { message: 'No parsed text found for this interaction' },
+            });
+            return;
+        }
+
+        // Generate content using callOpenAI
+        const contentResponse = await callOpenAI({
+            res,
+            messages: [
+                {
+                    role: 'user',
+                    content: `${config.prompt}:\n\n${interaction.parsedText}`,
+                }
+            ],
+            overrideMessages: true,
+        });
+
+        // Cache the content in the interaction
+        if (contentResponse && contentResponse.trim()) {
+            await updateInteractionWithContent({
+                interactionId,
+                content: contentResponse.trim(),
+                contentType: config.contentType,
+            });
+        }
+
+    } catch (error) {
+        console.error(`Error in ${config.contentType} endpoint:`, error);
+
+        if (!res.headersSent) {
+            internalError(res, undefined, {
+                error: { message: config.errorMessage }
+            });
+        }
+    }
+};
+
+export const getSummary = async (req: Request, res: Response): Promise<void> => {
+    await generateContent(req, res, {
+        contentType: 'summary',
+        prompt: 'Please provide a comprehensive summary of the following text. Focus on the main points, key insights, and important details',
+        errorMessage: 'Internal server error while generating summary',
+    });
+};
+
+export const getFaq = async (req: Request, res: Response): Promise<void> => {
+    await generateContent(req, res, {
+        contentType: 'faq',
+        prompt: 'Please generate a comprehensive list of frequently asked questions (FAQs) and their answers based on the following text. Format the response with clear questions followed by detailed answers. Focus on the most important and commonly asked questions about this content',
+        errorMessage: 'Internal server error while generating FAQ',
+    });
 };

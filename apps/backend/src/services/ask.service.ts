@@ -321,3 +321,44 @@ export const getMessagesWithCount = async ({
         throw new Error('Failed to fetch messages');
     }
 };
+
+interface UpdateInteractionWithContentParams {
+    interactionId: string;
+    content: string;
+    contentType: 'summary' | 'faq';
+}
+
+export const updateInteractionWithContent = async ({
+    interactionId,
+    content,
+    contentType,
+}: UpdateInteractionWithContentParams): Promise<InstanceType<typeof Interactions>> => {
+    try {
+        const updateField = { [contentType]: content, updatedAt: new Date() };
+
+        const updatedInteraction = await Interactions.findByIdAndUpdate(
+            interactionId,
+            updateField,
+            { new: true }
+        );
+
+        if (!updatedInteraction) {
+            throw new Error('Interaction not found');
+        }
+
+        return updatedInteraction;
+    } catch (error) {
+        console.error(`Error updating interaction with ${contentType}:`, error);
+        throw new Error(`Failed to update interaction with ${contentType}`);
+    }
+};
+
+export const getInteractionById = async (interactionId: string): Promise<InstanceType<typeof Interactions> | null> => {
+    try {
+        const interaction = await Interactions.findById(interactionId);
+        return interaction;
+    } catch (error) {
+        console.error('Error fetching interaction:', error);
+        throw new Error('Failed to fetch interaction');
+    }
+};
