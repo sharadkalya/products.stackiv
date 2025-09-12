@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 
-import { createInteraction, queryVector, storeInVector, updateInteraction, createMessage, updateMessage, getInteractionById, updateInteractionWithContent } from '@/services/ask.service';
+import { createInteraction, queryVector, storeInVector, updateInteraction, createMessage, updateMessage, getInteractionById, updateInteractionWithContent, getInteractionsByUserId, getChatHistory } from '@/services/ask.service';
 import { callOllama } from '@/utils/askHelpers/ollama';
 import { aiProviders, callOpenAI } from '@/utils/askHelpers/openAi';
 import { generateGuestUserId } from '@/utils/commonHelper';
@@ -226,9 +226,10 @@ export const ingestText = async (req: Request, res: Response): Promise<void> => 
                 totalChunks: chunks.length,
             },
         });
+        return;
     } catch (error) {
         console.error('Error in ask endpoint:', error);
-        internalError(res, undefined, {
+        internalError(res, "Error in ask ingest text endpoint", {
             error,
         });
     }
@@ -264,10 +265,20 @@ const generateContent = async (req: Request, res: Response, config: ContentGener
 
         // Check if content already exists and stream it
         const existingContent = interaction[config.contentType];
-        if (existingContent) {
+        if (existingContent && typeof existingContent === 'string') {
             res.setHeader('Content-Type', 'text/plain; charset=utf-8');
             res.setHeader('Transfer-Encoding', 'chunked');
-            res.write(existingContent);
+
+            // Simulate streaming by sending the content in chunks
+            const chunkSize = 50; // Characters per chunk
+            for (let i = 0; i < existingContent.length; i += chunkSize) {
+                const chunk = existingContent.slice(i, i + chunkSize);
+                res.write(chunk);
+
+                // Add a small delay to simulate streaming (make it more visible)
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+
             res.end();
             return;
         }
@@ -330,4 +341,109 @@ export const getFaq = async (req: Request, res: Response): Promise<void> => {
         prompt: 'Please generate a comprehensive list of frequently asked questions (FAQs) and their answers based on the following text. Format the response with clear questions followed by detailed answers. Focus on the most important and commonly asked questions about this content',
         errorMessage: 'Internal server error while generating FAQ',
     });
+};
+
+export const getHistory = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { userId } = req.body;
+
+        // Validate request payload
+        if (!userId || typeof userId !== 'string') {
+            badRequest(res, 'Invalid request', {
+                error: { message: 'userId field missing or invalid' },
+            });
+            return;
+        }
+
+        // Fetch interaction history from service
+        const history = await getInteractionsByUserId(userId);
+
+        // Return the history array (empty array if no interactions)
+        res.status(200).json(history);
+
+    } catch (error) {
+        console.error('Error in history endpoint:', error);
+        internalError(res, undefined, {
+            error: { message: 'Internal server error while fetching history' }
+        });
+    }
+};
+
+export const getInteraction = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { interactionId } = req.params;
+
+        // Validate request parameters
+        if (!interactionId || typeof interactionId !== 'string') {
+            badRequest(res, 'Invalid request', {
+                error: { message: 'interactionId parameter missing or invalid' },
+            });
+            return;
+        }
+
+        // Fetch interaction from database
+        const interaction = await getInteractionById(interactionId);
+
+        if (!interaction) {
+            badRequest(res, 'Interaction not found', {
+                error: { message: 'No interaction found with the provided ID' },
+            });
+            return;
+        }
+
+        // Return the interaction data in the format expected by the frontend
+        const parsedText = interaction.parsedText as string;
+        const title = parsedText && typeof parsedText === 'string' && parsedText.length > 100
+            ? parsedText.substring(0, 100) + '...'
+            : parsedText || 'Untitled Interaction';
+
+        res.status(200).json({
+            interactionId: interaction._id?.toString(),
+            text: parsedText,
+            userId: interaction.user,
+            title: title,
+            createdAt: interaction.createdAt,
+            updatedAt: interaction.updatedAt,
+        });
+
+    } catch (error) {
+        console.error('Error in get interaction endpoint:', error);
+        internalError(res, undefined, {
+            error: { message: 'Internal server error while fetching interaction' }
+        });
+    }
+};
+
+export const getQueryHistory = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { interactionId } = req.body;
+
+        // Validate request payload
+        if (!interactionId || typeof interactionId !== 'string') {
+            badRequest(res, 'Invalid request', {
+                error: { message: 'interactionId field missing or invalid' },
+            });
+            return;
+        }
+
+        // Fetch chat history from service
+        const chatHistory = await getChatHistory(interactionId);
+
+        // Transform the data for frontend consumption
+        const formattedHistory = chatHistory.map(message => ({
+            id: message._id?.toString(),
+            query: message.query,
+            response: message.response || '',
+            timestamp: message.createdAt,
+            pending: message.pending
+        }));
+
+        res.status(200).json(formattedHistory);
+
+    } catch (error) {
+        console.error('Error in get query history endpoint:', error);
+        internalError(res, undefined, {
+            error: { message: 'Internal server error while fetching chat history' }
+        });
+    }
 };

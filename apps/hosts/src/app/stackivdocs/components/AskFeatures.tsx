@@ -9,9 +9,9 @@ const features = [
     },
     {
         id: 2,
-        title: 'Q&A',
+        title: 'FAQ',
         subtitle: 'Generate Q&A based from your documents',
-        path: '/qa',
+        path: '/faq',
     },
     {
         id: 3,

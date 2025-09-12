@@ -322,6 +322,26 @@ export const getMessagesWithCount = async ({
     }
 };
 
+/**
+ * Get chat history for a specific interaction
+ */
+export const getChatHistory = async (interactionId: string): Promise<InstanceType<typeof Message>[]> => {
+    try {
+        if (!interactionId || typeof interactionId !== 'string') {
+            throw new Error('Invalid interactionId provided');
+        }
+
+        const messages = await Message.find({ interactionId })
+            .sort({ createdAt: 1 }) // Sort chronologically (oldest first)
+            .select('query response createdAt pending');
+
+        return messages;
+    } catch (error) {
+        console.error('Error fetching chat history:', error);
+        throw new Error('Failed to fetch chat history');
+    }
+};
+
 interface UpdateInteractionWithContentParams {
     interactionId: string;
     content: string;
@@ -360,5 +380,45 @@ export const getInteractionById = async (interactionId: string): Promise<Instanc
     } catch (error) {
         console.error('Error fetching interaction:', error);
         throw new Error('Failed to fetch interaction');
+    }
+};
+
+interface HistoryItem {
+    interactionId: string;
+    title: string;
+}
+
+/**
+ * Get interaction history for a user
+ */
+export const getInteractionsByUserId = async (userId: string): Promise<HistoryItem[]> => {
+    try {
+        if (!userId || typeof userId !== 'string') {
+            throw new Error('Invalid userId provided');
+        }
+
+        const interactions = await Interactions.find({ user: userId })
+            .select('_id parsedText createdAt')
+            .sort({ createdAt: -1 }) // Most recent first
+            .limit(50); // Limit to last 50 interactions
+
+        // Transform to the required format
+        const history: HistoryItem[] = interactions.map((interaction) => {
+            const parsedText = interaction.parsedText as string;
+            const text = parsedText || '';
+            const title = text.length > 100
+                ? text.substring(0, 100) + '...'
+                : text || 'Untitled Interaction';
+
+            return {
+                interactionId: interaction._id?.toString() || '',
+                title,
+            };
+        });
+
+        return history;
+    } catch (error) {
+        console.error('Error fetching user interactions:', error);
+        throw new Error('Failed to fetch user interaction history');
     }
 };
