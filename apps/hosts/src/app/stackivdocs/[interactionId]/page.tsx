@@ -1,16 +1,18 @@
 'use client';
-import { useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import {
     useAppDispatch,
     useAppSelector,
     loadInteractionAction,
-    selectActiveSession
+    selectActiveSession,
 } from 'shared-redux';
 
 // Create selectors for the load interaction states (global pending for loadInteraction)
-const selectLoadInteractionPending = (state: any) => state.ask.pending;
-const selectLoadInteractionError = (state: any) => state.ask.error; export default function InteractionPage() {
+const selectLoadInteractionPending = (state: { ask: { pending: boolean } }) => state.ask.pending;
+const selectLoadInteractionError = (state: { ask: { error: string | null } }) => state.ask.error;
+
+export default function InteractionPage() {
     const params = useParams();
     const router = useRouter();
     const interactionId = params.interactionId as string;

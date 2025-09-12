@@ -2,9 +2,9 @@
 
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { useAppSelector, useAppDispatch } from 'shared-redux';
 import { selectActiveSession, loadInteractionAction } from 'shared-redux';
-import { useEffect, useState } from 'react';
 
 export default function Analysis() {
     const params = useParams();

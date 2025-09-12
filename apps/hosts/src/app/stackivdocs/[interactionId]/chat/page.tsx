@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { useEffect, useState, useRef } from 'react';
 import { useAppSelector, useAppDispatch } from 'shared-redux';
 import { selectActiveSession, loadInteractionAction } from 'shared-redux';
-import { useEffect, useState, useRef } from 'react';
+
 import { useAsk } from '../../hooks/useAsk';
 
 interface Message {
@@ -87,13 +88,13 @@ export default function Chat() {
         if (chatHistory && chatHistory.length > 0 && !historyConverted) {
             const historyMessages: Message[] = [];
 
-            chatHistory.forEach((item: ChatHistoryItem) => {
+            (chatHistory as ChatHistoryItem[]).forEach((item) => {
                 // Add user message
                 historyMessages.push({
                     id: `${item.id}-user`,
                     content: item.query,
                     isUser: true,
-                    timestamp: new Date(item.timestamp)
+                    timestamp: new Date(item.timestamp),
                 });
 
                 // Add bot response if it exists and is not pending
@@ -102,7 +103,7 @@ export default function Chat() {
                         id: `${item.id}-bot`,
                         content: item.response,
                         isUser: false,
-                        timestamp: new Date(item.timestamp)
+                        timestamp: new Date(item.timestamp),
                     });
                 }
             });
@@ -121,7 +122,7 @@ export default function Chat() {
                 id: 'welcome',
                 content: `Hello! I'm here to help you understand and explore your content. Feel free to ask me any questions about the document you've uploaded.`,
                 isUser: false,
-                timestamp: new Date()
+                timestamp: new Date(),
             };
             setMessages([welcomeMessage]);
         }
@@ -134,7 +135,7 @@ export default function Chat() {
             id: Date.now().toString(),
             content: inputValue.trim(),
             isUser: true,
-            timestamp: new Date()
+            timestamp: new Date(),
         };
 
         const botMessage: Message = {
@@ -142,7 +143,7 @@ export default function Chat() {
             content: '',
             isUser: false,
             timestamp: new Date(),
-            isStreaming: true
+            isStreaming: true,
         };
 
         setMessages(prev => [...prev, userMessage, botMessage]);
@@ -158,14 +159,14 @@ export default function Chat() {
                 (chunk) => {
                     setCurrentStreamingMessage(prev => prev + chunk);
                 },
-                abortControllerRef.current?.signal
+                abortControllerRef.current?.signal,
             );
 
             // Update the bot message with final content
             setMessages(prev => prev.map(msg =>
                 msg.id === botMessage.id
                     ? { ...msg, content: fullResponse, isStreaming: false }
-                    : msg
+                    : msg,
             ));
         } catch (error) {
             if (abortControllerRef.current?.signal.aborted) {
@@ -173,14 +174,14 @@ export default function Chat() {
                 setMessages(prev => prev.map(msg =>
                     msg.id === botMessage.id
                         ? { ...msg, content: currentStreamingMessage || 'Response was stopped.', isStreaming: false }
-                        : msg
+                        : msg,
                 ));
             } else {
                 console.error('Error sending message:', error);
                 setMessages(prev => prev.map(msg =>
                     msg.id === botMessage.id
                         ? { ...msg, content: 'Sorry, I encountered an error while processing your request.', isStreaming: false }
-                        : msg
+                        : msg,
                 ));
             }
         }
@@ -198,7 +199,7 @@ export default function Chat() {
         setMessages(prev => prev.map(msg =>
             msg.isStreaming
                 ? { ...msg, content: currentStreamingMessage, isStreaming: false }
-                : msg
+                : msg,
         ));
         setCurrentStreamingMessage('');
         resetChat();
@@ -278,7 +279,7 @@ export default function Chat() {
                                     className={`max-w-xs lg:max-w-md xl:max-w-lg px-4 py-2 rounded-lg ${message.isUser
                                         ? 'bg-primary text-primary-content ml-auto'
                                         : 'bg-base-200 text-base-content'
-                                        }`}
+                                    }`}
                                 >
                                     <div className="whitespace-pre-wrap break-words">
                                         {message.isStreaming ? (
@@ -325,7 +326,7 @@ export default function Chat() {
                                 rows={1}
                                 style={{
                                     height: 'auto',
-                                    minHeight: '50px'
+                                    minHeight: '50px',
                                 }}
                                 onInput={(e) => {
                                     const target = e.target as HTMLTextAreaElement;

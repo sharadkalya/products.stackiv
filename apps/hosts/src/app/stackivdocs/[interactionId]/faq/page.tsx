@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { useAppSelector, useAppDispatch } from 'shared-redux';
 import { selectActiveSession, loadInteractionAction } from 'shared-redux';
 
@@ -164,7 +164,7 @@ export default function FAQ() {
                                         </svg>
                                         <div>
                                             <h3 className="font-bold">No FAQ Available</h3>
-                                            <div className="text-xs">Click "Generate FAQ" to create frequently asked questions for this content.</div>
+                                            <div className="text-xs">Click &quot;Generate FAQ&quot; to create frequently asked questions for this content.</div>
                                         </div>
                                     </div>
                                     <div className="mt-4">
