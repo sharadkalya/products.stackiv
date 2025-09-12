@@ -44,16 +44,6 @@ export default function Chat() {
     // Check if this is the correct interaction loaded in active session
     const isCorrectInteractionLoaded = activeSession?.id === interactionId;
 
-    // Debug logging
-    useEffect(() => {
-        console.log('Chat Debug Info:');
-        console.log('- interactionId:', interactionId);
-        console.log('- activeSession?.id:', activeSession?.id);
-        console.log('- isCorrectInteractionLoaded:', isCorrectInteractionLoaded);
-        console.log('- interactionLoaded:', interactionLoaded);
-        console.log('- chatHistoryLoaded:', chatHistoryLoaded);
-    }, [interactionId, activeSession?.id, isCorrectInteractionLoaded, interactionLoaded, chatHistoryLoaded]);
-
     // Auto-scroll to bottom when new messages arrive
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -66,7 +56,6 @@ export default function Chat() {
     // Reset states when interaction changes
     useEffect(() => {
         if (prevInteractionIdRef.current && prevInteractionIdRef.current !== interactionId) {
-            console.log('Interaction changed from', prevInteractionIdRef.current, 'to', interactionId);
             setChatHistoryLoaded(false);
             setHistoryConverted(false);
             setMessages([]);
@@ -80,7 +69,6 @@ export default function Chat() {
     // Load interaction if not already loaded
     useEffect(() => {
         if (interactionId && !isCorrectInteractionLoaded && !interactionLoaded) {
-            console.log('Loading interaction:', interactionId);
             setInteractionLoaded(true);
             dispatch(loadInteractionAction({ interactionId }));
         }
@@ -89,7 +77,6 @@ export default function Chat() {
     // Load chat history when interaction is ready
     useEffect(() => {
         if (isCorrectInteractionLoaded && interactionId && !chatHistoryLoaded) {
-            console.log('Loading chat history for interaction:', interactionId);
             setChatHistoryLoaded(true);
             fetchChatHistory({ interactionId });
         }
@@ -169,7 +156,6 @@ export default function Chat() {
             const fullResponse = await fetchQuery(
                 { query: userMessage.content, interactionId },
                 (chunk) => {
-                    console.log('Received chunk:', chunk);
                     setCurrentStreamingMessage(prev => prev + chunk);
                 },
                 abortControllerRef.current?.signal

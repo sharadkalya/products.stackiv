@@ -22,19 +22,6 @@ export default function Summary() {
     // Check if there's an active session with data and interaction ID
     const hasActiveSession = hasSessionContent && !!interactionId;
 
-    // Debug logging
-    useEffect(() => {
-        console.log('Summary Page - Debug Info:');
-        console.log('- activeSession:', activeSession);
-        console.log('- hasSessionContent:', hasSessionContent);
-        console.log('- hasProcessedSession:', hasProcessedSession);
-        console.log('- hasActiveSession:', hasActiveSession);
-        console.log('- interactionId (resolved):', interactionId);
-        console.log('- summaryLoading:', summaryLoading);
-        console.log('- summaryText:', summaryText ? 'Has text' : 'No text');
-        console.log('- summaryError:', summaryError);
-    }, [activeSession, hasSessionContent, hasProcessedSession, hasActiveSession, interactionId, summaryLoading, summaryText, summaryError]);
-
     // Timer effect for loading state
     useEffect(() => {
         let interval: NodeJS.Timeout;
@@ -56,18 +43,14 @@ export default function Summary() {
         // If we have an active session and interaction ID, fetch the summary
         // Only trigger if we don't have text, aren't loading, and don't have an error
         if (hasActiveSession && interactionId && !summaryText && !summaryLoading && !summaryError) {
-            console.log('Auto-triggering summary fetch with interactionId:', interactionId);
             fetchSummary({ interactionId });
         }
     }, [hasActiveSession, interactionId, summaryText, summaryLoading, summaryError, fetchSummary]);
 
     const handleRetry = () => {
-        console.log('Try Again clicked, activeSession:', activeSession);
-        console.log('Resolved interactionId:', interactionId);
         resetSummary();
         setLoadingTimer(0); // Reset the timer
         if (interactionId) {
-            console.log('Calling fetchSummary with interactionId:', interactionId);
             fetchSummary({ interactionId });
         } else {
             console.warn('No interactionId available for retry');
@@ -151,7 +134,6 @@ export default function Summary() {
                             <button
                                 className="btn btn-outline"
                                 onClick={() => {
-                                    console.log('Error state - Try Again clicked!');
                                     handleRetry();
                                 }}
                             >
@@ -216,7 +198,6 @@ export default function Summary() {
                                         <button
                                             className="btn btn-primary"
                                             onClick={() => {
-                                                console.log('Button clicked!');
                                                 handleRetry();
                                             }}
                                         >
@@ -256,11 +237,8 @@ export default function Summary() {
                             <button
                                 className="btn btn-xs btn-secondary"
                                 onClick={() => {
-                                    console.log('Force calling fetchSummary with resolved ID...');
                                     if (interactionId) {
                                         fetchSummary({ interactionId });
-                                    } else {
-                                        console.error('No interactionId available for test call');
                                     }
                                 }}
                             >

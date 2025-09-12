@@ -24,22 +24,9 @@ export default function Summary() {
     const isCorrectInteractionLoaded = activeSession?.id === interactionId;
     const hasSummaryData = !!summaryText;
 
-    // Debug logging
-    useEffect(() => {
-        console.log('Summary Page - Debug Info:');
-        console.log('- URL interactionId:', interactionId);
-        console.log('- activeSession?.id:', activeSession?.id);
-        console.log('- isCorrectInteractionLoaded:', isCorrectInteractionLoaded);
-        console.log('- hasSummaryData:', hasSummaryData);
-        console.log('- summaryLoading:', summaryLoading);
-        console.log('- summaryError:', summaryError);
-        console.log('- interactionLoaded:', interactionLoaded);
-    }, [interactionId, activeSession?.id, isCorrectInteractionLoaded, hasSummaryData, summaryLoading, summaryError, interactionLoaded]);
-
     // Load interaction if not already loaded
     useEffect(() => {
         if (interactionId && !isCorrectInteractionLoaded && !interactionLoaded) {
-            console.log('Loading interaction:', interactionId);
             setInteractionLoaded(true);
             dispatch(loadInteractionAction({ interactionId }));
         }
@@ -48,7 +35,6 @@ export default function Summary() {
     // Fetch summary once interaction is loaded and we don't have summary data
     useEffect(() => {
         if (isCorrectInteractionLoaded && !hasSummaryData && !summaryLoading && !summaryError) {
-            console.log('Auto-triggering summary fetch for interactionId:', interactionId);
             fetchSummary({ interactionId });
         }
     }, [isCorrectInteractionLoaded, hasSummaryData, summaryLoading, summaryError, interactionId, fetchSummary]);
@@ -71,7 +57,6 @@ export default function Summary() {
     }, [summaryLoading]);
 
     const handleRetry = () => {
-        console.log('Try Again clicked for interactionId:', interactionId);
         resetSummary();
         setLoadingTimer(0);
         fetchSummary({ interactionId });

@@ -24,22 +24,9 @@ export default function FAQ() {
     const isCorrectInteractionLoaded = activeSession?.id === interactionId;
     const hasFaqData = !!faqText;
 
-    // Debug logging
-    useEffect(() => {
-        console.log('FAQ Page - Debug Info:');
-        console.log('- URL interactionId:', interactionId);
-        console.log('- activeSession?.id:', activeSession?.id);
-        console.log('- isCorrectInteractionLoaded:', isCorrectInteractionLoaded);
-        console.log('- hasFaqData:', hasFaqData);
-        console.log('- faqLoading:', faqLoading);
-        console.log('- faqError:', faqError);
-        console.log('- interactionLoaded:', interactionLoaded);
-    }, [interactionId, activeSession?.id, isCorrectInteractionLoaded, hasFaqData, faqLoading, faqError, interactionLoaded]);
-
     // Load interaction if not already loaded
     useEffect(() => {
         if (interactionId && !isCorrectInteractionLoaded && !interactionLoaded) {
-            console.log('Loading interaction:', interactionId);
             setInteractionLoaded(true);
             dispatch(loadInteractionAction({ interactionId }));
         }
@@ -48,7 +35,6 @@ export default function FAQ() {
     // Fetch FAQ once interaction is loaded and we don't have FAQ data
     useEffect(() => {
         if (isCorrectInteractionLoaded && !hasFaqData && !faqLoading && !faqError) {
-            console.log('Auto-triggering FAQ fetch for interactionId:', interactionId);
             fetchFaq({ interactionId });
         }
     }, [isCorrectInteractionLoaded, hasFaqData, faqLoading, faqError, interactionId, fetchFaq]);
@@ -71,7 +57,6 @@ export default function FAQ() {
     }, [faqLoading]);
 
     const handleRetry = () => {
-        console.log('Try Again clicked for interactionId:', interactionId);
         resetFaq();
         setLoadingTimer(0);
         fetchFaq({ interactionId });

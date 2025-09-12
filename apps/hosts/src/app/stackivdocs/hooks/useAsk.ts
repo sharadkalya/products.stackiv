@@ -30,38 +30,30 @@ export const useAsk = () => {
 
     // Reset function for summary
     const resetSummary = useCallback(() => {
-        console.log('Resetting summary state...');
         setSummaryText('');
         setSummaryError('');
         setSummaryLoading(false);
-        console.log('Summary state reset complete');
     }, []);
 
     // Reset function for FAQ
     const resetFaq = useCallback(() => {
-        console.log('Resetting FAQ state...');
         setFaqText('');
         setFaqError('');
         setFaqLoading(false);
-        console.log('FAQ state reset complete');
     }, []);
 
     // Reset function for chat
     const resetChat = useCallback(() => {
-        console.log('Resetting chat state...');
         setChatError('');
         setChatLoading(false);
         setIsStreaming(false);
-        console.log('Chat state reset complete');
     }, []);
 
     // Reset function for chat history
     const resetChatHistory = useCallback(() => {
-        console.log('Resetting chat history state...');
         setChatHistory([]);
         setChatHistoryError('');
         setChatHistoryLoading(false);
-        console.log('Chat history state reset complete');
     }, []);
 
     const parseRawText = useCallback(
@@ -197,7 +189,6 @@ export const useAsk = () => {
                 }
             } catch (error) {
                 if (abortSignal?.aborted) {
-                    console.log('Stream was aborted');
                     return;
                 }
                 logMsg('useAsk hook', 'Stream processing error', error);
@@ -266,7 +257,6 @@ export const useAsk = () => {
     };
 
     const fetchQuery = useCallback(async (payload: { query: string, interactionId: string }, onChunk?: (chunk: string) => void, abortSignal?: AbortSignal): Promise<string> => {
-        console.log('fetchQuery called with:', payload);
         setChatError('');
         setChatLoading(true);
         setIsStreaming(true);
@@ -277,14 +267,12 @@ export const useAsk = () => {
         await processStream(
             () => askQueryApi(payload),
             (chunk) => {
-                console.log('processStream received chunk:', chunk);
                 if (!firstContentReceived) {
                     setChatLoading(false);
                     firstContentReceived = true;
                 }
                 fullResponse += chunk;
                 if (onChunk) {
-                    console.log('Calling onChunk with:', chunk);
                     onChunk(chunk);
                 }
             },
@@ -294,7 +282,6 @@ export const useAsk = () => {
             abortSignal
         );
 
-        console.log('fetchQuery completed, fullResponse:', fullResponse);
         setIsStreaming(false);
         return fullResponse;
     }, []);

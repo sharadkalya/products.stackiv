@@ -20,7 +20,6 @@ export default function Analysis() {
     // Load interaction if not already loaded
     useEffect(() => {
         if (interactionId && !isCorrectInteractionLoaded && !interactionLoaded) {
-            console.log('Loading interaction for analysis:', interactionId);
             setInteractionLoaded(true);
             dispatch(loadInteractionAction({ interactionId }));
         }

@@ -22,19 +22,6 @@ export default function FAQ() {
     // Check if there's an active session with data and interaction ID
     const hasActiveSession = hasSessionContent && !!interactionId;
 
-    // Debug logging
-    useEffect(() => {
-        console.log('FAQ Page - Debug Info:');
-        console.log('- activeSession:', activeSession);
-        console.log('- hasSessionContent:', hasSessionContent);
-        console.log('- hasProcessedSession:', hasProcessedSession);
-        console.log('- hasActiveSession:', hasActiveSession);
-        console.log('- interactionId (resolved):', interactionId);
-        console.log('- faqLoading:', faqLoading);
-        console.log('- faqText:', faqText ? 'Has text' : 'No text');
-        console.log('- faqError:', faqError);
-    }, [activeSession, hasSessionContent, hasProcessedSession, hasActiveSession, interactionId, faqLoading, faqText, faqError]);
-
     // Timer effect for loading state
     useEffect(() => {
         let interval: NodeJS.Timeout;
@@ -56,23 +43,15 @@ export default function FAQ() {
         // If we have an active session and interaction ID, fetch the FAQ
         // Only trigger if we don't have text, aren't loading, and don't have an error
         if (hasActiveSession && interactionId && !faqText && !faqLoading && !faqError) {
-            console.log('Auto-triggering FAQ fetch with interactionId:', interactionId);
             fetchFaq({ interactionId });
         }
     }, [hasActiveSession, interactionId, faqText, faqLoading, faqError, fetchFaq]);
 
     const handleRetry = () => {
-        console.log('Try Again clicked, activeSession:', activeSession);
-        console.log('Resolved interactionId:', interactionId);
         resetFaq();
         setLoadingTimer(0); // Reset the timer
         if (interactionId) {
-            console.log('Calling fetchFaq with interactionId:', interactionId);
             fetchFaq({ interactionId });
-        } else {
-            console.warn('No interactionId available for retry');
-            console.warn('activeSession.id:', activeSession?.id);
-            console.warn('activeSession.ingestedData:', activeSession?.ingestedData);
         }
     };
 
@@ -151,7 +130,6 @@ export default function FAQ() {
                             <button
                                 className="btn btn-outline"
                                 onClick={() => {
-                                    console.log('Error state - Try Again clicked!');
                                     handleRetry();
                                 }}
                             >
@@ -216,7 +194,6 @@ export default function FAQ() {
                                         <button
                                             className="btn btn-primary"
                                             onClick={() => {
-                                                console.log('Generate FAQ button clicked!');
                                                 handleRetry();
                                             }}
                                         >
@@ -256,11 +233,8 @@ export default function FAQ() {
                             <button
                                 className="btn btn-xs btn-secondary"
                                 onClick={() => {
-                                    console.log('Force calling fetchFaq with resolved ID...');
                                     if (interactionId) {
                                         fetchFaq({ interactionId });
-                                    } else {
-                                        console.error('No interactionId available for test call');
                                     }
                                 }}
                             >
