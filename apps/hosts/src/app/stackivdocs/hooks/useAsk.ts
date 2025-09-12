@@ -26,7 +26,7 @@ export const useAsk = () => {
     // Chat history state
     const [chatHistoryLoading, setChatHistoryLoading] = useState(false);
     const [chatHistoryError, setChatHistoryError] = useState('');
-    const [chatHistory, setChatHistory] = useState<any[]>([]);
+    const [chatHistory, setChatHistory] = useState<unknown[]>([]);
 
     // Reset function for summary
     const resetSummary = useCallback(() => {
@@ -60,16 +60,16 @@ export const useAsk = () => {
         async (
             reader: ReadableStreamDefaultReader<Uint8Array>,
             decoder: TextDecoder,
-            onChunk: (chunk: string) => void,
-            abortSignal?: AbortSignal
+            onChunk: (_chunk: string) => void,
+            abortSignal?: AbortSignal,
         ) => {
             while (true) {
                 if (abortSignal?.aborted) break;
                 const { value, done } = await reader.read();
                 if (done) break;
                 if (value) {
-                    const chunk = decoder.decode(value);
-                    onChunk(chunk);
+                    const _chunk = decoder.decode(value);
+                    onChunk(_chunk);
                 }
             }
         },
@@ -80,8 +80,8 @@ export const useAsk = () => {
         async (
             reader: ReadableStreamDefaultReader<Uint8Array>,
             decoder: TextDecoder,
-            onChunk: (chunk: string) => void,
-            abortSignal?: AbortSignal
+            onChunk: (_chunk: string) => void,
+            abortSignal?: AbortSignal,
         ) => {
             let buffer = '';
 
@@ -119,11 +119,11 @@ export const useAsk = () => {
     const processStream = useCallback(
         async (
             apiCall: () => Promise<Response>,
-            onChunk: (chunk: string) => void,
-            setLoading: (loading: boolean) => void,
-            setError: (error: string) => void,
+            onChunk: (_chunk: string) => void,
+            setLoading: (_loading: boolean) => void,
+            setError: (_error: string) => void,
             errorMsg: string,
-            abortSignal?: AbortSignal
+            abortSignal?: AbortSignal,
         ) => {
             try {
                 const apiRes = await apiCall();
@@ -210,7 +210,7 @@ export const useAsk = () => {
             (chunk) => setResult((prev) => prev + chunk),
             setAsking,
             setError,
-            'Error getting response, try later!'
+            'Error getting response, try later!',
         );
     };
 
@@ -231,7 +231,7 @@ export const useAsk = () => {
             },
             setSummaryLoading,
             setSummaryError,
-            'Error getting summary, try later!'
+            'Error getting summary, try later!',
         );
     };
 
@@ -252,11 +252,11 @@ export const useAsk = () => {
             },
             setFaqLoading,
             setFaqError,
-            'Error getting FAQ, try later!'
+            'Error getting FAQ, try later!',
         );
     };
 
-    const fetchQuery = useCallback(async (payload: { query: string, interactionId: string }, onChunk?: (chunk: string) => void, abortSignal?: AbortSignal): Promise<string> => {
+    const fetchQuery = useCallback(async (payload: { query: string, interactionId: string }, onChunk?: (_chunk: string) => void, abortSignal?: AbortSignal): Promise<string> => {
         setChatError('');
         setChatLoading(true);
         setIsStreaming(true);
@@ -279,12 +279,12 @@ export const useAsk = () => {
             setChatLoading,
             setChatError,
             'Error getting response, try later!',
-            abortSignal
+            abortSignal,
         );
 
         setIsStreaming(false);
         return fullResponse;
-    }, []);
+    }, [processStream]);
 
     const fetchChatHistory = useCallback(async (payload: { interactionId: string }) => {
         setChatHistoryError('');

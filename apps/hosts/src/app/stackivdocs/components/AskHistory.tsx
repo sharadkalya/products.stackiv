@@ -1,12 +1,12 @@
 'use client';
-import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import {
     useAppDispatch,
     useAppSelector,
     fetchHistoryAction,
     selectHistoryItems,
-    selectHistoryLoading
+    selectHistoryLoading,
 } from 'shared-redux';
 
 export function AskHistory() {

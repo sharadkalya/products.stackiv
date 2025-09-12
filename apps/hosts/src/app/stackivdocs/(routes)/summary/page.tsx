@@ -191,7 +191,7 @@ export default function Summary() {
                                         </svg>
                                         <div>
                                             <h3 className="font-bold">No Summary Available</h3>
-                                            <div className="text-xs">Click "Try Again" to generate a summary for this content.</div>
+                                            <div className="text-xs">Click &quot;Try Again&quot; to generate a summary for this content.</div>
                                         </div>
                                     </div>
                                     <div className="mt-4">
