@@ -147,7 +147,7 @@ export const query = async (req: Request, res: Response): Promise<void> => {
 
         if (!res.headersSent) {
             internalError(res, undefined, {
-                error: { message: 'Internal server error' }
+                error: { message: 'Internal server error' },
             });
         }
     }
@@ -229,7 +229,7 @@ export const ingestText = async (req: Request, res: Response): Promise<void> => 
         return;
     } catch (error) {
         console.error('Error in ask endpoint:', error);
-        internalError(res, "Error in ask ingest text endpoint", {
+        internalError(res, 'Error in ask ingest text endpoint', {
             error,
         });
     }
@@ -302,7 +302,7 @@ const generateContent = async (req: Request, res: Response, config: ContentGener
                 {
                     role: 'user',
                     content: `${config.prompt}:\n\n${interaction.parsedText}`,
-                }
+                },
             ],
             overrideMessages: true,
         });
@@ -321,7 +321,7 @@ const generateContent = async (req: Request, res: Response, config: ContentGener
 
         if (!res.headersSent) {
             internalError(res, undefined, {
-                error: { message: config.errorMessage }
+                error: { message: config.errorMessage },
             });
         }
     }
@@ -364,7 +364,7 @@ export const getHistory = async (req: Request, res: Response): Promise<void> => 
     } catch (error) {
         console.error('Error in history endpoint:', error);
         internalError(res, undefined, {
-            error: { message: 'Internal server error while fetching history' }
+            error: { message: 'Internal server error while fetching history' },
         });
     }
 };
@@ -409,7 +409,7 @@ export const getInteraction = async (req: Request, res: Response): Promise<void>
     } catch (error) {
         console.error('Error in get interaction endpoint:', error);
         internalError(res, undefined, {
-            error: { message: 'Internal server error while fetching interaction' }
+            error: { message: 'Internal server error while fetching interaction' },
         });
     }
 };
@@ -435,7 +435,7 @@ export const getQueryHistory = async (req: Request, res: Response): Promise<void
             query: message.query,
             response: message.response || '',
             timestamp: message.createdAt,
-            pending: message.pending
+            pending: message.pending,
         }));
 
         res.status(200).json(formattedHistory);
@@ -443,7 +443,7 @@ export const getQueryHistory = async (req: Request, res: Response): Promise<void
     } catch (error) {
         console.error('Error in get query history endpoint:', error);
         internalError(res, undefined, {
-            error: { message: 'Internal server error while fetching chat history' }
+            error: { message: 'Internal server error while fetching chat history' },
         });
     }
 };
