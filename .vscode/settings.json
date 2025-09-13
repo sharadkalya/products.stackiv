@@ -29,5 +29,18 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "cSpell.words": [
         "stackiv"
-    ]
+    ],
+    // ESLint configuration for monorepo
+    "eslint.workingDirectories": [
+        "./apps/hosts",
+        "./apps/backend"
+    ],
+    "eslint.validate": [
+        "javascript",
+        "javascriptreact",
+        "typescript",
+        "typescriptreact"
+    ],
+    "eslint.run": "onType",
+    "eslint.enable": true
 }
