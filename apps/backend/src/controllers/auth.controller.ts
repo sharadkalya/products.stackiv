@@ -166,8 +166,18 @@ export const loginViaGoogle = async (req: Request, res: Response) => {
 };
 
 export const logout = async (req: Request, res: Response) => {
-    res.clearCookie('Authorization', commonCookieOptions);
-    res.clearCookie('RefreshToken', commonCookieOptions);
+    try {
+    // Clear both auth cookies with proper options
+        res.clearCookie('Authorization', commonCookieOptions);
+        res.clearCookie('RefreshToken', {
+            ...commonCookieOptions,
+            maxAge: 7 * 24 * 60 * 60 * 1000, // Match the original maxAge for proper clearing
+        });
 
-    res.status(200).json({ message: 'Logged out successfully' });
+        res.status(200).json({ message: 'Logged out successfully' });
+    } catch (error) {
+        console.error('Error in logout:', error);
+        // Still return success even if there's an error, as cookies may already be cleared
+        res.status(200).json({ message: 'Logged out successfully' });
+    }
 };
