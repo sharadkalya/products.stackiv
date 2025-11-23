@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useSelector } from 'react-redux';
+import { selectAuthUser } from 'shared-redux';
 
 import LogoutButton from '@common/LogoutButton';
 
@@ -11,6 +13,7 @@ const isProd = process.env.NODE_ENV === 'production';
 export default function Header() {
     const router = useRouter();
     const [menuOpen, setMenuOpen] = useState(false);
+    const user = useSelector(selectAuthUser);
 
     const handleLoginClick = () => {
         setMenuOpen(false);
@@ -46,10 +49,17 @@ export default function Header() {
                 </Link>
             </div>
 
+            {/* Desktop auth buttons */}
+            <div className="hidden lg:flex items-center gap-4">
+                {user ? (
+                    <LogoutButton />
+                ) : null}
+            </div>
+
             {/* Hamburger for mobile (only when menu is closed) */}
             {!menuOpen && (
                 <button
-                    className="lg:hidden text-2xl ml-auto z-20"
+                    className="lg:hidden text-2xl ml-auto"
                     onClick={() => setMenuOpen(true)}
                     aria-label="Open menu"
                 >
@@ -59,7 +69,7 @@ export default function Header() {
 
             {/* Drawer for mobile menu */}
             <div
-                className={`fixed top-0 right-0 h-full w-64 bg-base-100 shadow-lg transform transition-transform duration-300 z-10
+                className={`fixed top-0 right-0 h-full w-64 bg-base-100 shadow-lg transform transition-transform duration-300 z-50
                 ${menuOpen ? 'translate-x-0' : 'translate-x-full'} lg:hidden`}
             >
                 {/* Close button inside the drawer */}
@@ -77,20 +87,23 @@ export default function Header() {
 
                 {/* Menu items */}
                 <nav className="flex flex-col items-start p-4 space-y-2">
-                    <LogoutButton />
-                    <button
-                        className="btn btn-primary w-full"
-                        onClick={handleLoginClick}
-                    >
-                        Login
-                    </button>
+                    {user ? (
+                        <LogoutButton />
+                    ) : (
+                        <button
+                            className="btn btn-primary w-full"
+                            onClick={handleLoginClick}
+                        >
+                            Login
+                        </button>
+                    )}
                 </nav>
             </div>
 
             {/* Overlay: closes menu when tapped */}
             {menuOpen && (
                 <div
-                    className="fixed inset-0 bg-black opacity-30 z-0"
+                    className="fixed inset-0 bg-black opacity-30 z-40"
                     onClick={handleOverlayClick}
                 />
             )}

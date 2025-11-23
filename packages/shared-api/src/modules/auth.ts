@@ -23,3 +23,13 @@ export async function logout() {
     const response = await axios.post(`${API_BASE_URL}/auth/logout`, {}, { withCredentials: true });
     return response.data;
 }
+
+export async function getCurrentUser(): Promise<User | null> {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/auth/me`, { withCredentials: true });
+        return response.data.user as User;
+    } catch (error) {
+        // If 401 or no user, return null
+        return null;
+    }
+}

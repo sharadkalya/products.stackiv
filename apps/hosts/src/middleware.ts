@@ -7,22 +7,19 @@ import type { NextRequest } from 'next/server';
 const publicPaths = ['/', '/login', '/signup', '/about'];
 const protectedPaths = ['/dashboard', '/account', '/settings'];
 const isProd = process.env.NODE_ENV === 'production';
+const JWT_SECRET = process.env.JWT_SECRET_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9';
 
 const isPathMatch = (pathname: string, paths: string[]) =>
     paths.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 
-function isTokenExpired(token: string): boolean {
-    const decoded = jwt.decode(token);
-    if (
-        decoded &&
-        typeof decoded === 'object' &&
-        'exp' in decoded &&
-        typeof decoded.exp === 'number'
-    ) {
-        const now = Math.floor(Date.now() / 1000);
-        return decoded.exp < now;
+function verifyToken(token: string): boolean {
+    try {
+        jwt.verify(token, JWT_SECRET);
+        return true;
+    } catch (error) {
+        console.warn('Token verification failed:', error instanceof Error ? error.message : 'Unknown error');
+        return false;
     }
-    return true; // treat as expired if can't parse
 }
 
 export function middleware(request: NextRequest) {
@@ -38,15 +35,18 @@ export function middleware(request: NextRequest) {
     const isPublic = isPathMatch(pathname, publicPaths);
     const isProtected = isPathMatch(pathname, protectedPaths);
 
-    if (token && isPathMatch(pathname, ['/login', '/signup'])) {
+    // If user has valid token and tries to access login/signup, redirect to home
+    if (token && verifyToken(token) && isPathMatch(pathname, ['/login', '/signup'])) {
         return NextResponse.redirect(new URL('/', request.url));
     }
 
+    // Allow public paths
     if (isPublic) return NextResponse.next();
 
+    // Check protected paths
     if (isProtected) {
-        if (!token || isTokenExpired(token)) {
-            console.warn('Missing or expired token — redirecting to login');
+        if (!token || !verifyToken(token)) {
+            console.warn('Missing or invalid token — redirecting to login');
 
             const response = NextResponse.redirect(new URL('/login', request.url));
 
@@ -55,6 +55,13 @@ export function middleware(request: NextRequest) {
                 path: '/',
                 expires: new Date(0), // Expire immediately
                 domain: isProd ? '.stackiv.com' : undefined, // Add domain for prod
+            });
+
+            // Clear RefreshToken cookie as well
+            response.cookies.set('RefreshToken', '', {
+                path: '/',
+                expires: new Date(0),
+                domain: isProd ? '.stackiv.com' : undefined,
             });
 
             return response;

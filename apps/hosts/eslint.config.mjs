@@ -17,6 +17,7 @@ const eslintConfig = [
             semi: ["error", "always"],
             quotes: ["error", "single", { avoidEscape: true, allowTemplateLiterals: true }],
             "no-multiple-empty-lines": ["error", { max: 1, maxEOF: 1, maxBOF: 0 }],
+            "no-trailing-spaces": ["error"],
             indent: ["error", 4, { SwitchCase: 1 }],
             "no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
             "object-curly-spacing": ["error", "always"],

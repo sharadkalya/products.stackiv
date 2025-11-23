@@ -165,6 +165,21 @@ export const loginViaGoogle = async (req: Request, res: Response) => {
     }
 };
 
+export const getCurrentUser = async (req: Request, res: Response) => {
+    try {
+        // User is already attached to req by JWT middleware
+        if (!req.user) {
+            unauthorized(res, 'Not authenticated');
+            return;
+        }
+
+        res.status(200).json({ user: req.user });
+    } catch (error) {
+        console.error('Error in getCurrentUser:', error);
+        internalError(res, 'Internal server error');
+    }
+};
+
 export const logout = async (req: Request, res: Response) => {
     try {
     // Clear both auth cookies with proper options
