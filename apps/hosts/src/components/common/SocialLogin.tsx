@@ -1,6 +1,6 @@
 'use client';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { signInViaGoogle } from 'shared-auth';
 import { useTranslation } from 'shared-i18n';
@@ -11,6 +11,7 @@ export default function SocialLogin() {
     const { t } = useTranslation();
     const dispatch = useDispatch<AppDispatch>();
     const router = useRouter();
+    const searchParams = useSearchParams();
 
     const forwardResponse = async (res: ISignupResult) => {
         const { success, emailVerified, user } = res;
@@ -22,7 +23,9 @@ export default function SocialLogin() {
                 password: 'ignorePassword',
             };
             await dispatch(loginViaGoogleAction(action));
-            router.replace('/');
+            const redirect = searchParams.get('redirect') || '/';
+            console.log('redirect url is', redirect);
+            router.replace(redirect);
         }
 
     };

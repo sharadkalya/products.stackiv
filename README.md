@@ -1,7 +1,7 @@
-# stayinn
+# stackiv
 
 **Work in progress 🚧**  
-Stayinn is a full-stack monorepo app currently under development. This app will support multiple user roles, authentication with Firebase (email, Google, phone), and data persistence via MongoDB Atlas.
+Stackiv is a full-stack monorepo app currently under development. This app will support multiple user roles, authentication with Firebase (email, Google, phone), and data persistence via MongoDB Atlas.
 
 ---
 
@@ -11,7 +11,7 @@ This monorepo uses **Yarn Workspaces** to manage shared packages and multiple ap
 
 ```
 
-stayinn/
+stackiv/
 │
 ├── apps/
 │   ├── hosts/           # Frontend (Next.js)

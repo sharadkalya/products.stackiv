@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { selectAuthUser } from 'shared-redux';
@@ -10,13 +10,17 @@ import { selectAuthUser } from 'shared-redux';
  */
 export function AuthRedirect({ children }: { children: React.ReactNode }) {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    console.log('searchParams', searchParams);
     const user = useSelector(selectAuthUser);
 
     useEffect(() => {
         if (user) {
-            router.replace('/');
+            const redirect = searchParams.get('redirect') || '/';
+            console.log('redirect', searchParams.get('redirect'));
+            router.replace(redirect);
         }
-    }, [user, router]);
+    }, [user, router, searchParams]);
 
     // Don't render children if user is authenticated
     if (user) {

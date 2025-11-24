@@ -1,7 +1,7 @@
 'use client';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
@@ -19,6 +19,7 @@ export default function EmailLogin() {
     const dispatch = useDispatch<AppDispatch>();
     const { t } = useTranslation();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [alertTitle, setAlertTitle] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
@@ -45,7 +46,8 @@ export default function EmailLogin() {
                     password,
                 };
                 await dispatch(loginAction(action));
-                router.replace('/');
+                const redirect = searchParams.get('redirect') || '/';
+                router.replace(redirect);
             } else {
                 setAlertTitle(t(message));
             }

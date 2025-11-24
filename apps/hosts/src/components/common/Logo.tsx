@@ -8,7 +8,7 @@ export default function Logo() {
 
             {/* App Name */}
             <span className="text-2xl font-bold text-base-content">
-                Stay<span className="text-primary">inn.</span>
+                Stack<span className="text-primary">iv.</span>
             </span>
         </div>
     );

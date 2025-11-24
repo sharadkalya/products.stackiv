@@ -1,7 +1,7 @@
 {
     "name": "shared-i18n",
     "version": "1.0.0",
-    "description": "Shared i18n package for Stayinn apps",
+    "description": "Shared i18n package for Stackiv apps",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "files": [

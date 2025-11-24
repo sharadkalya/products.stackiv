@@ -1,15 +1,16 @@
 /* eslint-disable no-console */
 
-import jwt from 'jsonwebtoken';
+import { jwtVerify } from 'jose';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { PUBLIC_ROUTES, PROTECTED_ROUTES, isRouteMatch } from 'shared-config';
 
 const JWT_SECRET = process.env.JWT_SECRET_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9';
 
-function verifyToken(token: string): boolean {
+async function verifyToken(token: string): Promise<boolean> {
     try {
-        jwt.verify(token, JWT_SECRET);
+        const secret = new TextEncoder().encode(JWT_SECRET);
+        await jwtVerify(token, secret);
         return true;
     } catch (error) {
         console.warn('Token verification failed:', error instanceof Error ? error.message : 'Unknown error');
@@ -17,7 +18,7 @@ function verifyToken(token: string): boolean {
     }
 }
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
     const token = request.cookies.get('Authorization')?.value;
 
@@ -29,8 +30,11 @@ export function middleware(request: NextRequest) {
     const isPublic = isRouteMatch(pathname, PUBLIC_ROUTES);
     const isProtected = isRouteMatch(pathname, PROTECTED_ROUTES);
 
+    const isTokenValid = token ? await verifyToken(token) : false;
+    console.log('token && verifyToken(token)', isTokenValid);
+
     // If user has valid token and tries to access login/signup, redirect to home
-    if (token && verifyToken(token) && isRouteMatch(pathname, ['/login', '/signup'])) {
+    if (isTokenValid && isRouteMatch(pathname, ['/login', '/signup'])) {
         return NextResponse.redirect(new URL('/', request.url));
     }
 
@@ -39,9 +43,11 @@ export function middleware(request: NextRequest) {
 
     // Check protected paths - redirect to login if no valid token
     if (isProtected) {
-        if (!token || !verifyToken(token)) {
+        if (!isTokenValid) {
             console.warn('Protected route without valid token — redirecting to login');
-            return NextResponse.redirect(new URL('/login', request.url));
+            const loginUrl = new URL('/login', request.url);
+            loginUrl.searchParams.set('redirect', pathname);
+            return NextResponse.redirect(loginUrl);
         }
     }
 

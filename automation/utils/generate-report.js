@@ -24,7 +24,7 @@ reporter.generate({
   customData: {
     title: 'Run info',
     data: [
-      { label: 'Project', value: 'StayInn' },
+        { label: 'Project', value: 'Stackiv' },
       { label: 'Release', value: '1.0.0' },
       { label: 'Browser', value: browserName },
       { label: 'Execution Start Time', value: new Date().toLocaleString() },

@@ -1,6 +1,6 @@
-# Stayinn Monorepo — Developer Onboarding Guide
+# Stackiv Monorepo — Developer Onboarding Guide
 
-Welcome to the **Stayinn** project! This document will help you understand the monorepo structure, setup your environment, and start the frontend and backend apps smoothly.
+Welcome to the **Stackiv** project! This document will help you understand the monorepo structure, setup your environment, and start the frontend and backend apps smoothly.
 
 ---
 
@@ -16,7 +16,7 @@ This is a **monorepo** managed with [Yarn Workspaces](https://classic.yarnpkg.co
 ## 2. Directory Structure
 
 ```
-Stayinn/
+Stackiv/
 ├── apps/
 │   ├── hosts/           # Frontend Next.js app (React, app-router)
 │   └── backend/         # Backend Node.js + Express API server

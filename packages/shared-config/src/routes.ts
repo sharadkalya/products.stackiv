@@ -5,7 +5,20 @@
 
 export const PUBLIC_ROUTES = ['/', '/login', '/signup', '/about'];
 
-export const PROTECTED_ROUTES = ['/dashboard', '/account', '/settings'];
+export const PROTECTED_ROUTES = [
+    '/dashboard',
+    '/account',
+    '/settings',
+    '/odoo',
+    '/odoo/dashboard',
+    '/odoo/customers',
+    '/odoo/sales-orders',
+    '/odoo/invoices',
+    '/odoo/connection-setup',
+    '/odoo/sync-history',
+    '/odoo/account-settings',
+    '/odoo/logout',
+];
 
 /**
  * Check if a pathname matches any route in the given list
