@@ -21,6 +21,7 @@ export const OdooConnectionSchema = z.object({
     dbName: z.string().min(1, 'Database name is required'),
     username: z.string().min(1, 'Username is required'),
     password: z.string().min(1, 'Password is required'),
+    status: z.enum(['pending', 'success', 'fail']).optional(),
 });
 
 export type OdooConnectionPayload = z.infer<typeof OdooConnectionSchema>;

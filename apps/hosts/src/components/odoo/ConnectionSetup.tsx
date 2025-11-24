@@ -2,10 +2,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { getOdooConnection, testOdooConnection } from 'shared-api';
+import { getOdooConnection, saveOdooConnection, testOdooConnection } from 'shared-api';
 import { ODOO_FORM_LABELS, ODOO_FORM_PLACEHOLDERS, ODOO_MESSAGES } from 'shared-config';
 import { OdooConnectionPayload, OdooConnectionSchema } from 'shared-types';
 
+import ConfirmModal from '../common/ConfirmModal';
 import FormInput from '../common/FormInput';
 
 type AlertType = 'success' | 'error' | 'info' | null;
@@ -19,6 +20,12 @@ const ConnectionSetup = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isFetchingData, setIsFetchingData] = useState(true);
     const [alert, setAlert] = useState<Alert | null>(null);
+    const [hasExistingData, setHasExistingData] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [lastTestStatus, setLastTestStatus] = useState<'success' | 'fail' | null>(null);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [pendingSaveData, setPendingSaveData] = useState<OdooConnectionPayload | null>(null);
+    const [connectionInfo, setConnectionInfo] = useState<string | null>(null);
 
     const {
         register,
@@ -43,22 +50,22 @@ const ConnectionSetup = () => {
                     setValue('dbName', dbName);
                     setValue('username', username);
 
-                    // Show info message about existing connection
+                    setHasExistingData(true);
+
+                    // Set info message about existing connection
                     if (status === 'success') {
-                        setAlert({
-                            type: 'success',
-                            message: 'Previously saved connection found. You can update any field and test again.',
-                        });
+                        setConnectionInfo('Previously saved connection found. Click "Edit" to modify credentials.');
                     } else if (status === 'fail') {
-                        setAlert({
-                            type: 'error',
-                            message: 'Previous connection attempt failed. Please verify your credentials.',
-                        });
+                        setConnectionInfo('Previous connection attempt failed. Click "Edit" to update credentials.');
+                    } else {
+                        setConnectionInfo('Connection details saved but not tested yet. Click "Edit" to modify.');
                     }
+                } else {
+                    setIsEditing(true); // No existing data, enable editing by default
                 }
             } catch (error) {
                 console.error('Error fetching existing connection:', error);
-                // Don't show error to user, just let them fill the form fresh
+                setIsEditing(true); // Enable editing on error
             } finally {
                 setIsFetchingData(false);
             }
@@ -67,7 +74,7 @@ const ConnectionSetup = () => {
         fetchExistingConnection();
     }, [setValue]);
 
-    const onSubmit = async (data: OdooConnectionPayload) => {
+    const handleTestConnection = async (data: OdooConnectionPayload) => {
         setIsLoading(true);
         setAlert({ type: 'info', message: ODOO_MESSAGES.TESTING_CONNECTION });
 
@@ -76,8 +83,10 @@ const ConnectionSetup = () => {
 
             if (response.success) {
                 setAlert({ type: 'success', message: ODOO_MESSAGES.TEST_CONNECTION_SUCCESS });
+                setLastTestStatus('success');
             } else {
                 setAlert({ type: 'error', message: response.message || ODOO_MESSAGES.TEST_CONNECTION_FAIL });
+                setLastTestStatus('fail');
             }
         } catch (error: unknown) {
             const errorMessage =
@@ -88,9 +97,90 @@ const ConnectionSetup = () => {
                 type: 'error',
                 message: errorMessage || ODOO_MESSAGES.TEST_CONNECTION_ERROR,
             });
+            setLastTestStatus('fail');
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const handleSaveConnection = async (data: OdooConnectionPayload) => {
+        // Show confirmation if there's existing data
+        if (hasExistingData) {
+            setPendingSaveData(data);
+            setShowConfirmModal(true);
+            return;
+        }
+
+        // If no existing data, save directly
+        await performSave(data);
+    };
+
+    const performSave = async (data: OdooConnectionPayload) => {
+        setIsLoading(true);
+        setAlert({ type: 'info', message: 'Saving connection details...' });
+
+        try {
+            // Include the last test status if available
+            const payload: OdooConnectionPayload = {
+                ...data,
+                status: (lastTestStatus as 'success' | 'fail') || 'pending',
+            };
+            const response = await saveOdooConnection(payload);
+
+            if (response.success) {
+                setAlert({ type: 'success', message: 'Connection details saved successfully!' });
+                setHasExistingData(true);
+                setIsEditing(false);
+                setLastTestStatus(null); // Reset after saving
+
+                // Update connection info
+                const newStatus = lastTestStatus || 'pending';
+                if (newStatus === 'success') {
+                    setConnectionInfo('Previously saved connection found. Click "Edit" to modify credentials.');
+                } else if (newStatus === 'fail') {
+                    setConnectionInfo('Previous connection attempt failed. Click "Edit" to update credentials.');
+                } else {
+                    setConnectionInfo('Connection details saved but not tested yet. Click "Edit" to modify.');
+                }
+            } else {
+                setAlert({ type: 'error', message: 'Failed to save connection details.' });
+            }
+        } catch (error: unknown) {
+            const errorMessage =
+                error && typeof error === 'object' && 'response' in error
+                    ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
+                    : undefined;
+            setAlert({
+                type: 'error',
+                message: errorMessage || 'An error occurred while saving.',
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleConfirmSave = async () => {
+        setShowConfirmModal(false);
+        if (pendingSaveData) {
+            await performSave(pendingSaveData);
+            setPendingSaveData(null);
+        }
+    };
+
+    const handleCancelSave = () => {
+        setShowConfirmModal(false);
+        setPendingSaveData(null);
+    };
+
+    const handleEdit = () => {
+        setIsEditing(true);
+        setAlert(null);
+    };
+
+    const handleCancelEdit = () => {
+        setIsEditing(false);
+        // Reload existing data
+        window.location.reload();
     };
 
     if (isFetchingData) {
@@ -107,14 +197,59 @@ const ConnectionSetup = () => {
         );
     }
 
+    const fieldsDisabled = hasExistingData && !isEditing;
+
     return (
         <div className="max-w-2xl p-3">
+            <ConfirmModal
+                isOpen={showConfirmModal}
+                title="Override Existing Credentials?"
+                message="This will override any previously saved credentials and cannot be undone. Do you want to proceed?"
+                confirmText="Yes, Override"
+                cancelText="Cancel"
+                onConfirm={handleConfirmSave}
+                onCancel={handleCancelSave}
+                type="warning"
+            />
             <div className="card bg-base-100">
                 <div className="card-body">
-                    <h2 className="card-title text-2xl mb-4">Odoo Connection Setup</h2>
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="card-title text-2xl">Odoo Connection Setup</h2>
+                        {hasExistingData && !isEditing && (
+                            <button type="button" onClick={handleEdit} className="btn btn-sm btn-outline">
+                                Edit
+                            </button>
+                        )}
+                        {isEditing && hasExistingData && (
+                            <button type="button" onClick={handleCancelEdit} className="btn btn-sm btn-ghost">
+                                Cancel
+                            </button>
+                        )}
+                    </div>
                     <p className="text-base-content/70 mb-6">
                         Connect your Odoo instance to sync your data seamlessly.
                     </p>
+
+                    {connectionInfo && !isEditing && (
+                        <div className="border border-base-300 rounded-lg p-4 mb-6 flex items-start gap-3">
+                            <div className="text-info mt-0.5">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    className="w-5 h-5 stroke-current"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
+                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    ></path>
+                                </svg>
+                            </div>
+                            <span className="text-sm text-base-content/80">{connectionInfo}</span>
+                        </div>
+                    )}
 
                     {alert && (
                         <div
@@ -130,12 +265,13 @@ const ConnectionSetup = () => {
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                    <form onSubmit={handleSubmit(handleTestConnection)} className="space-y-4">
                         <FormInput
                             label={ODOO_FORM_LABELS.ORG_NAME}
                             placeholder={ODOO_FORM_PLACEHOLDERS.ORG_NAME}
                             register={register('orgName')}
                             error={errors.orgName?.message}
+                            disabled={fieldsDisabled}
                         />
 
                         <FormInput
@@ -144,6 +280,7 @@ const ConnectionSetup = () => {
                             type="url"
                             register={register('odooUrl')}
                             error={errors.odooUrl?.message}
+                            disabled={fieldsDisabled}
                         />
 
                         <FormInput
@@ -151,6 +288,7 @@ const ConnectionSetup = () => {
                             placeholder={ODOO_FORM_PLACEHOLDERS.DB_NAME}
                             register={register('dbName')}
                             error={errors.dbName?.message}
+                            disabled={fieldsDisabled}
                         />
 
                         <FormInput
@@ -158,6 +296,7 @@ const ConnectionSetup = () => {
                             placeholder={ODOO_FORM_PLACEHOLDERS.USERNAME}
                             register={register('username')}
                             error={errors.username?.message}
+                            disabled={fieldsDisabled}
                         />
 
                         <FormInput
@@ -166,17 +305,35 @@ const ConnectionSetup = () => {
                             type="password"
                             register={register('password')}
                             error={errors.password?.message}
+                            disabled={fieldsDisabled}
                         />
 
-                        <div className="card-actions justify-end mt-6">
+                        <div className="card-actions justify-end mt-6 gap-2">
+                            {isEditing && (
+                                <button
+                                    type="button"
+                                    onClick={handleSubmit(handleSaveConnection)}
+                                    className="btn btn-secondary"
+                                    disabled={isLoading}
+                                >
+                                    {isLoading ? (
+                                        <>
+                                            <span className="loading loading-spinner loading-sm"></span>
+                                            Saving...
+                                        </>
+                                    ) : (
+                                        'Save'
+                                    )}
+                                </button>
+                            )}
                             <button
                                 type="submit"
-                                className={`btn btn-primary ${isLoading ? 'loading' : ''}`}
-                                disabled={isLoading}
+                                className="btn btn-primary"
+                                disabled={isLoading || fieldsDisabled}
                             >
                                 {isLoading ? (
                                     <>
-                                        <span className="loading loading-spinner"></span>
+                                        <span className="loading loading-spinner loading-sm"></span>
                                         Testing...
                                     </>
                                 ) : (

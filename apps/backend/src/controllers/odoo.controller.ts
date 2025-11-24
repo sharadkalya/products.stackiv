@@ -21,7 +21,7 @@ export const testConnection = async (req: Request, res: Response) => {
             return;
         }
 
-        const { orgName, odooUrl, dbName, username, password } = result.data;
+        const { odooUrl, dbName, username, password } = result.data;
 
         // Get user ID from authenticated request
         const userId = req.user?.firebaseUid;
@@ -38,20 +38,11 @@ export const testConnection = async (req: Request, res: Response) => {
             password,
         );
 
-        // Determine status based on test result
-        const status = connectionResult.success ? 'success' : 'fail';
-
-        // Store connection details in database (always, regardless of success/failure)
-        await upsertOdooConnection(userId, result.data, status);
-
-        // Update user's organization name (always, as user provided it)
-        await updateUserOrgName(userId, orgName);
-
-        // Return response
+        // Return response (don't save anything)
         res.status(200).json({
             success: connectionResult.success,
             message: connectionResult.message,
-            status,
+            status: connectionResult.success ? 'success' : 'fail',
         });
     } catch (error) {
         console.error('Error in testConnection:', error);
@@ -93,6 +84,43 @@ export const getConnection = async (req: Request, res: Response) => {
         });
     } catch (error) {
         console.error('Error in getConnection:', error);
+        internalError(res, 'Internal server error');
+    }
+};
+
+export const saveConnection = async (req: Request, res: Response) => {
+    try {
+        // Validate request body
+        const result = OdooConnectionSchema.safeParse(req.body);
+
+        if (!result.success) {
+            const errors = formatZodError(result.error);
+            badRequest(res, 'Invalid request', { errors });
+            return;
+        }
+
+        const { orgName, status } = result.data;
+
+        // Get user ID from authenticated request
+        const userId = req.user?.firebaseUid;
+        if (!userId) {
+            badRequest(res, 'User not authenticated');
+            return;
+        }
+
+        // Save connection details with provided status or default to pending
+        await upsertOdooConnection(userId, result.data, status || 'pending');
+
+        // Update user's organization name
+        await updateUserOrgName(userId, orgName);
+
+        // Return response
+        res.status(200).json({
+            success: true,
+            message: 'Connection details saved successfully',
+        });
+    } catch (error) {
+        console.error('Error in saveConnection:', error);
         internalError(res, 'Internal server error');
     }
 };

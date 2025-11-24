@@ -12,6 +12,15 @@ export async function testOdooConnection(payload: OdooConnectionPayload): Promis
     return response.data;
 }
 
+export async function saveOdooConnection(payload: OdooConnectionPayload): Promise<{ success: boolean; message: string }> {
+    const response = await axios.post(
+        `${API_BASE_URL}/odoo/save-connection`,
+        payload,
+        { withCredentials: true },
+    );
+    return response.data;
+}
+
 export async function getOdooConnection(): Promise<OdooConnectionResponse> {
     const response = await axios.get(
         `${API_BASE_URL}/odoo/connection`,

@@ -87,7 +87,7 @@ export function OdooSidebar({ className = '' }: OdooSidebarProps) {
             <div className="p-4 border-b-2 border-base-content/20 flex items-center justify-between flex-shrink-0">
                 <h2 className={`text-lg font-semibold text-base-content whitespace-nowrap transition-opacity duration-300 ${
                     isCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'
-                }`}>Odoo Menu</h2>
+                }`}>Menu</h2>
                 <button
                     onClick={() => setIsCollapsed(!isCollapsed)}
                     className="p-1 rounded hover:bg-base-200 text-base-content flex-shrink-0"

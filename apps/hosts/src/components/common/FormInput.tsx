@@ -8,9 +8,10 @@ type FormInputProps = {
     placeholder?: string;
     type?: string;
     register: UseFormRegisterReturn;
+    disabled?: boolean;
 };
 
-const FormInput = ({ label, error, placeholder, type = 'text', register }: FormInputProps) => (
+const FormInput = ({ label, error, placeholder, type = 'text', register, disabled = false }: FormInputProps) => (
     <div className="flex flex-col space-y-1">
         <label className="label">
             <span className="label-text">{label}</span>
@@ -20,6 +21,7 @@ const FormInput = ({ label, error, placeholder, type = 'text', register }: FormI
             type={type}
             className={`input w-full ${error ? 'input-error' : ''}`}
             placeholder={placeholder}
+            disabled={disabled}
         />
         {error && <span className="text-error text-sm">{error}</span>}
     </div>
