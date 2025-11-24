@@ -22,6 +22,7 @@ const UserSchema: Schema = new Schema(
         lastName: { type: String },
         phoneNumber: { type: Number },
         verified: { type: Boolean },
+        orgName: { type: String },
     },
     { timestamps: true },
 );
