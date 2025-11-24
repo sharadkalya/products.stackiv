@@ -173,7 +173,16 @@ export const getCurrentUser = async (req: Request, res: Response) => {
             return;
         }
 
-        res.status(200).json({ user: req.user });
+        // JWT middleware only provides partial user data (firebaseUid, email, roles)
+        // Fetch the complete user record from the database
+        const fullUser = await findUserByFirebaseUid(req.user.firebaseUid);
+
+        if (!fullUser) {
+            unauthorized(res, 'User not found');
+            return;
+        }
+
+        res.status(200).json({ user: fullUser });
     } catch (error) {
         console.error('Error in getCurrentUser:', error);
         internalError(res, 'Internal server error');

@@ -1,11 +1,15 @@
+import { AuthRedirect } from '@hosts/components/AuthRedirect';
+
 import Signup from './components/Signup';
 
 export default async function Login() {
     return (
-        <div className="signupPage">
-            <div className="tabs tabs-lift flex">
-                <Signup />
+        <AuthRedirect>
+            <div className="signupPage">
+                <div className="tabs tabs-lift flex">
+                    <Signup />
+                </div>
             </div>
-        </div>
+        </AuthRedirect>
     );
 }

@@ -3,14 +3,9 @@
 import jwt from 'jsonwebtoken';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { PUBLIC_ROUTES, PROTECTED_ROUTES, isRouteMatch } from 'shared-config';
 
-const publicPaths = ['/', '/login', '/signup', '/about'];
-const protectedPaths = ['/dashboard', '/account', '/settings'];
-const isProd = process.env.NODE_ENV === 'production';
 const JWT_SECRET = process.env.JWT_SECRET_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9';
-
-const isPathMatch = (pathname: string, paths: string[]) =>
-    paths.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 
 function verifyToken(token: string): boolean {
     try {
@@ -26,45 +21,27 @@ export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
     const token = request.cookies.get('Authorization')?.value;
 
-    console.log('-------------------Middleware Cookies:-------------------');
-    request.cookies.getAll().forEach(({ name, value }) =>
-        console.log(`${name}: ${value}`),
-    );
-    console.log('-------------------Middleware Cookies:-------------------');
+    console.log('-------------------Middleware:-------------------');
+    console.log('Path:', pathname);
+    console.log('Has token:', !!token);
+    console.log('-------------------Middleware:-------------------');
 
-    const isPublic = isPathMatch(pathname, publicPaths);
-    const isProtected = isPathMatch(pathname, protectedPaths);
+    const isPublic = isRouteMatch(pathname, PUBLIC_ROUTES);
+    const isProtected = isRouteMatch(pathname, PROTECTED_ROUTES);
 
     // If user has valid token and tries to access login/signup, redirect to home
-    if (token && verifyToken(token) && isPathMatch(pathname, ['/login', '/signup'])) {
+    if (token && verifyToken(token) && isRouteMatch(pathname, ['/login', '/signup'])) {
         return NextResponse.redirect(new URL('/', request.url));
     }
 
     // Allow public paths
     if (isPublic) return NextResponse.next();
 
-    // Check protected paths
+    // Check protected paths - redirect to login if no valid token
     if (isProtected) {
         if (!token || !verifyToken(token)) {
-            console.warn('Missing or invalid token — redirecting to login');
-
-            const response = NextResponse.redirect(new URL('/login', request.url));
-
-            // Clear the Authorization cookie
-            response.cookies.set('Authorization', '', {
-                path: '/',
-                expires: new Date(0), // Expire immediately
-                domain: isProd ? '.stackiv.com' : undefined, // Add domain for prod
-            });
-
-            // Clear RefreshToken cookie as well
-            response.cookies.set('RefreshToken', '', {
-                path: '/',
-                expires: new Date(0),
-                domain: isProd ? '.stackiv.com' : undefined,
-            });
-
-            return response;
+            console.warn('Protected route without valid token — redirecting to login');
+            return NextResponse.redirect(new URL('/login', request.url));
         }
     }
 

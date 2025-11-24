@@ -10,12 +10,12 @@ export async function signup(payload: SignupPayload): Promise<User> {
 
 export async function login(payload: LoginPayload): Promise<User> {
     const response = await axios.post(`${API_BASE_URL}/auth/login`, payload, { withCredentials: true });
-    return response.data as User;
+    return response.data.user as User;
 }
 
 export async function loginViaGoogle(payload: LoginPayload): Promise<User> {
     const response = await axios.post(`${API_BASE_URL}/auth/loginViaGoogle`, payload, { withCredentials: true });
-    return response.data as User;
+    return response.data.user as User;
 }
 
 
