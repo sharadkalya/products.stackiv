@@ -1,7 +1,5 @@
-import { OdooApp } from './components/OdooApp';
+import { redirect } from 'next/navigation';
 
 export default async function Odoo() {
-    return (
-        <OdooApp />
-    );
+    redirect('/odoo/dashboard');
 }

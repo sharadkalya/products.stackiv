@@ -17,6 +17,20 @@ export function OdooSidebar({ className = '' }: OdooSidebarProps) {
     const pathname = usePathname();
     const [isCollapsed, setIsCollapsed] = useState(false);
 
+    const getMenuIcon = (name: string) => {
+        const iconMap: Record<string, string> = {
+            'Dashboard': '📊',
+            'Customers': '👥',
+            'Sales Orders': '🛒',
+            'Invoices': '📄',
+            'Odoo Connection Setup': '🔗',
+            'Sync History': '🔄',
+            'Account Settings': '⚙️',
+            'Logout': '🚪',
+        };
+        return iconMap[name] || '📌';
+    };
+
     const primaryMenuItems: MenuItem[] = [
         { name: 'Dashboard', route: '/odoo/dashboard' },
         { name: 'Customers', route: '/odoo/customers' },
@@ -35,6 +49,10 @@ export function OdooSidebar({ className = '' }: OdooSidebarProps) {
     ];
 
     const isActiveRoute = (route: string) => {
+        // Treat /odoo as /odoo/dashboard
+        if (pathname === '/odoo' && route === '/odoo/dashboard') {
+            return true;
+        }
         return pathname === route;
     };
 
@@ -43,66 +61,65 @@ export function OdooSidebar({ className = '' }: OdooSidebarProps) {
             <Link
                 key={item.route}
                 href={item.route}
-                className={`flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-all duration-300 ${
                     isActiveRoute(item.route)
-                        ? 'bg-blue-100 text-blue-700'
-                        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                        ? 'bg-primary text-primary-content'
+                        : 'text-base-content hover:bg-primary hover:text-primary-content'
                 } ${isCollapsed ? 'justify-center' : ''}`}
                 title={isCollapsed ? item.name : ''}
             >
-                <span className={`flex items-center ${isCollapsed ? 'hidden' : ''}`}>
-                    ◼ {item.name}
-                </span>
-                {isCollapsed && <span>◼</span>}
+                <span className="text-lg flex-shrink-0 w-6 text-center">{getMenuIcon(item.name)}</span>
+                <span className={`whitespace-nowrap transition-opacity duration-300 ${
+                    isCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'
+                }`}>{item.name}</span>
             </Link>
         ));
     };
 
     return (
         <aside
-            className={`bg-white border-r border-gray-200 transition-all duration-300 ${
+            className={`bg-base-100 transition-all duration-300 overflow-hidden flex flex-col sticky top-19 ${
                 isCollapsed ? 'w-16' : 'w-64'
             } ${className}`}
+            style={{ height: 'calc(100vh - 180px)', overflowY: 'auto' }}
         >
-            <div className="flex flex-col h-full">
-                {/* Header with collapse toggle */}
-                <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-                    {!isCollapsed && (
-                        <h2 className="text-lg font-semibold text-gray-800">Odoo Menu</h2>
-                    )}
-                    <button
-                        onClick={() => setIsCollapsed(!isCollapsed)}
-                        className="p-1 rounded hover:bg-gray-100 text-gray-600"
-                        aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-                    >
-                        {isCollapsed ? '→' : '←'}
-                    </button>
+            {/* Header with collapse toggle */}
+            <div className="p-4 border-b-2 border-base-content/20 flex items-center justify-between flex-shrink-0">
+                <h2 className={`text-lg font-semibold text-base-content whitespace-nowrap transition-opacity duration-300 ${
+                    isCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'
+                }`}>Odoo Menu</h2>
+                <button
+                    onClick={() => setIsCollapsed(!isCollapsed)}
+                    className="p-1 rounded hover:bg-base-200 text-base-content flex-shrink-0"
+                    aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                >
+                    {isCollapsed ? '→' : '←'}
+                </button>
+            </div>
+
+            {/* Menu sections */}
+            <nav className="flex-1 p-4 space-y-6">
+                {/* Primary Menu Items */}
+                <div className="space-y-1">
+                    {renderMenuItems(primaryMenuItems)}
                 </div>
 
-                {/* Menu sections */}
-                <nav className="flex-1 p-4 space-y-6 overflow-y-auto">
-                    {/* Primary Menu Items */}
-                    <div className="space-y-1">
-                        {renderMenuItems(primaryMenuItems)}
-                    </div>
+                {/* Divider */}
+                <div className="border-t-2 border-base-content/20"></div>
 
-                    {/* Divider */}
-                    <div className="border-t border-gray-300"></div>
+                {/* Integration Menu Items */}
+                <div className="space-y-1">
+                    {renderMenuItems(integrationMenuItems)}
+                </div>
 
-                    {/* Integration Menu Items */}
-                    <div className="space-y-1">
-                        {renderMenuItems(integrationMenuItems)}
-                    </div>
+                {/* Divider */}
+                <div className="border-t-2 border-base-content/20"></div>
 
-                    {/* Divider */}
-                    <div className="border-t border-gray-300"></div>
-
-                    {/* Account Menu Items */}
-                    <div className="space-y-1">
-                        {renderMenuItems(accountMenuItems)}
-                    </div>
-                </nav>
-            </div>
+                {/* Account Menu Items */}
+                <div className="space-y-1">
+                    {renderMenuItems(accountMenuItems)}
+                </div>
+            </nav>
         </aside>
     );
 }

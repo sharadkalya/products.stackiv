@@ -6,9 +6,9 @@ export default function OdooLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <div className="flex min-h-screen">
+        <div className="flex h-full">
             <OdooSidebar />
-            <main className="flex-1 overflow-y-auto bg-gray-50">
+            <main className="flex-1 p-4 border-l-2 border-base-content/20">
                 {children}
             </main>
         </div>
