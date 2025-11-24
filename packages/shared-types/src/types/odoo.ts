@@ -2,6 +2,8 @@ import { z } from 'zod';
 
 export type OdooConnectionStatus = 'pending' | 'success' | 'fail';
 
+export type SyncStatus = 'not_started' | 'pending' | 'in_progress' | 'done' | 'failed';
+
 export interface OdooConnectionDetails {
     userId: string;
     orgName: string;
@@ -42,4 +44,24 @@ export interface OdooConnectionResponse {
         status: OdooConnectionStatus;
         lastConnectionTestAt?: Date;
     } | null;
+}
+
+export interface OdooInitResponse {
+    isConnectionDetailsPresent: boolean;
+}
+
+export interface OdooSyncStatus {
+    userId: string;
+    connectionInfoAvailable: boolean;
+    syncStatus: SyncStatus | null;
+    lastSyncStartedAt?: Date | null;
+    lastSyncCompletedAt?: Date | null;
+    lastSyncFailedAt?: Date | null;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+export interface OdooStatusResponse {
+    exists: boolean;
+    status: OdooSyncStatus | null;
 }

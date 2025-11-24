@@ -1,7 +1,8 @@
-import { OdooConnectionPayload, OdooConnectionStatus } from 'shared-types';
+import { OdooConnectionPayload, OdooConnectionStatus, SyncStatus } from 'shared-types';
 import * as xmlrpc from 'xmlrpc';
 
 import { OdooConnectionDetails } from '@/models/odoo.model';
+import { OdooSyncStatus } from '@/models/odooSyncStatus.model';
 import { User } from '@/models/user.model';
 
 /**
@@ -116,4 +117,60 @@ export const updateUserOrgName = async (userId: string, orgName: string) => {
  */
 export const getOdooConnectionByUserId = async (userId: string) => {
     return await OdooConnectionDetails.findOne({ userId });
+};
+
+/**
+ * Get or create Odoo sync status for a user
+ */
+export const getOdooSyncStatus = async (userId: string) => {
+    return await OdooSyncStatus.findOne({ userId });
+};
+
+/**
+ * Create or update Odoo sync status
+ */
+export const upsertOdooSyncStatus = async (
+    userId: string,
+    connectionInfoAvailable: boolean,
+    syncStatus: SyncStatus | null = null,
+) => {
+    const existingStatus = await OdooSyncStatus.findOne({ userId });
+
+    const statusData = {
+        userId,
+        connectionInfoAvailable,
+        syncStatus,
+    };
+
+    if (existingStatus) {
+        return await OdooSyncStatus.findOneAndUpdate(
+            { userId },
+            statusData,
+            { new: true },
+        );
+    } else {
+        return await OdooSyncStatus.create(statusData);
+    }
+};
+
+/**
+ * Update sync status field
+ */
+export const updateSyncStatus = async (
+    userId: string,
+    syncStatus: SyncStatus,
+    additionalFields?: Partial<{
+        lastSyncStartedAt: Date;
+        lastSyncCompletedAt: Date;
+        lastSyncFailedAt: Date;
+    }>,
+) => {
+    return await OdooSyncStatus.findOneAndUpdate(
+        { userId },
+        {
+            syncStatus,
+            ...additionalFields,
+        },
+        { new: true },
+    );
 };
