@@ -26,12 +26,14 @@ const ConnectionSetup = () => {
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [pendingSaveData, setPendingSaveData] = useState<OdooConnectionPayload | null>(null);
     const [connectionInfo, setConnectionInfo] = useState<string | null>(null);
+    const [originalData, setOriginalData] = useState<OdooConnectionPayload | null>(null);
 
     const {
         register,
         handleSubmit,
         formState: { errors },
         setValue,
+        reset,
     } = useForm<OdooConnectionPayload>({
         resolver: zodResolver(OdooConnectionSchema),
     });
@@ -43,6 +45,10 @@ const ConnectionSetup = () => {
                 const response = await getOdooConnection();
                 if (response.exists && response.connection) {
                     const { orgName, odooUrl, dbName, username, status } = response.connection;
+
+                    // Store original data for cancel functionality (password is not returned from API)
+                    const connectionData = { orgName, odooUrl, dbName, username, password: '' };
+                    setOriginalData(connectionData);
 
                     // Populate form with existing values
                     setValue('orgName', orgName);
@@ -179,8 +185,13 @@ const ConnectionSetup = () => {
 
     const handleCancelEdit = () => {
         setIsEditing(false);
-        // Reload existing data
-        window.location.reload();
+        setAlert(null);
+        setLastTestStatus(null);
+
+        // Restore original data from state instead of reloading
+        if (originalData) {
+            reset(originalData);
+        }
     };
 
     if (isFetchingData) {
