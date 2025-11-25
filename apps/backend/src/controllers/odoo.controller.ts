@@ -10,6 +10,7 @@ import {
     upsertOdooConnection,
     upsertOdooSyncStatus,
 } from '@/services/odoo.service';
+import { OdooSyncService } from '@/services/odooSync.service';
 import { formatZodError } from '@/utils/formatError';
 import { badRequest, internalError } from '@/utils/response';
 
@@ -33,8 +34,17 @@ export const getStatus = async (req: Request, res: Response) => {
             return;
         }
 
+        // Get sync progress if sync is in progress
+        let progress = null;
+        if (syncStatus.syncStatus === 'in_progress') {
+            progress = await OdooSyncService.getSyncProgress(userId);
+        }
+
         res.status(200).json({
             exists: true,
+            connectionInfoAvailable: syncStatus.connectionInfoAvailable,
+            syncStatus: syncStatus.syncStatus,
+            progress,
             status: {
                 userId: syncStatus.userId,
                 connectionInfoAvailable: syncStatus.connectionInfoAvailable,
@@ -84,8 +94,22 @@ export const getDashboard = async (req: Request, res: Response) => {
             return;
         }
 
+        // Check sync status
+        const syncStatus = await getOdooSyncStatus(userId);
+
+        if (!syncStatus || syncStatus.syncStatus !== 'done') {
+            res.status(403).json({
+                error: 'sync_not_ready',
+                message: 'Dashboard data is not ready yet. Please wait for sync to complete.',
+                syncStatus: syncStatus?.syncStatus || 'not_started',
+            });
+            return;
+        }
+
+        // Sync is complete, return success
         res.status(200).json({
-            message: 'dashboard in progress',
+            success: true,
+            message: 'Dashboard data is ready',
         });
     } catch (error) {
         console.error('Error in getDashboard:', error);

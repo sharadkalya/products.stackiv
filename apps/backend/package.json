@@ -6,10 +6,13 @@
     "scripts": {
         "dev": "ts-node-dev --respawn --transpile-only --ignore-watch node_modules --require tsconfig-paths/register src/index.ts",
         "build": "tsc -b",
-        "start": "node --max-old-space-size=512 -r ts-node/register -r tsconfig-paths/register src/index.ts"
+        "start": "node --max-old-space-size=512 -r ts-node/register -r tsconfig-paths/register src/index.ts",
+        "cron:dev": "ts-node-dev --respawn --transpile-only --ignore-watch node_modules --require tsconfig-paths/register src/cron/odooSyncCron.ts",
+        "cron:start": "node --max-old-space-size=512 -r ts-node/register -r tsconfig-paths/register src/cron/odooSyncCron.ts"
     },
     "dependencies": {
         "@pinecone-database/pinecone": "^6.1.2",
+        "@types/node-cron": "^3.0.11",
         "accesscontrol": "^2.2.1",
         "apollo-server-express": "^3.13.0",
         "compromise": "^14.14.4",
@@ -23,6 +26,7 @@
         "helmet": "^8.1.0",
         "jsonwebtoken": "^9.0.2",
         "mongoose": "^8.15.1",
+        "node-cron": "^4.2.1",
         "openai": "^5.11.0",
         "shared-types": "^1.0.0",
         "tsconfig-paths": "^4.2.0",
