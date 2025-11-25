@@ -9,6 +9,11 @@ export interface IOdooSyncStatus extends Document {
     lastSyncStartedAt?: Date | null;
     lastSyncCompletedAt?: Date | null;
     lastSyncFailedAt?: Date | null;
+    // v3 fields for incremental sync
+    initialSyncDone: boolean; // true after initial sync completes
+    hasFailedBatches: boolean; // true if ANY batch fails
+    lastCompletedWindowEnd?: Date | null; // end-time of last successfully synced window
+    lastProcessId?: string | null; // pointer to most recent syncSession
     createdAt: Date;
     updatedAt: Date;
 }
@@ -25,6 +30,11 @@ const OdooSyncStatusSchema: Schema = new Schema(
         lastSyncStartedAt: { type: Date, default: null },
         lastSyncCompletedAt: { type: Date, default: null },
         lastSyncFailedAt: { type: Date, default: null },
+        // v3 fields for incremental sync
+        initialSyncDone: { type: Boolean, default: false },
+        hasFailedBatches: { type: Boolean, default: false },
+        lastCompletedWindowEnd: { type: Date, default: null },
+        lastProcessId: { type: String, default: null },
     },
     { timestamps: true },
 );

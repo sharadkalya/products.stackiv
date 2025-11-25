@@ -1,4 +1,4 @@
-# Odoo Sync Engine v2 - Test Scripts
+# Odoo Sync Engine v3 - Test Scripts
 
 ## ⭐ PRIMARY TEST: test-complete-sync.js
 
@@ -17,6 +17,7 @@ npx tsx test-complete-sync.js
 -   ✅ Handles Sales Orders, Invoices, Contacts, and Employees
 -   ✅ Real-time progress monitoring
 -   ✅ **Verifies MongoDB counts match Odoo source counts**
+-   ✅ **Sets v3 fields: initialSyncDone, lastCompletedWindowEnd**
 -   ✅ Comprehensive data quality checks
 -   ✅ Shows sample records with rich business data
 -   ✅ Batch status summary
@@ -41,9 +42,40 @@ Total Batches: 16 done, 0 failed
 
 ---
 
+## 🆕 V3 INCREMENTAL SYNC TEST: test-v3-incremental.js
+
+**Verifies v3 incremental sync features**
+
+```bash
+npx tsx test-v3-incremental.js
+```
+
+**What it does:**
+
+-   ✅ Verifies `initialSyncDone` is set to true
+-   ✅ Verifies `lastCompletedWindowEnd` matches latest batch
+-   ✅ Checks `hasFailedBatches` status
+-   ✅ Tests incremental batch generation logic
+-   ✅ Shows when next incremental window is due
+
+**Expected Output:**
+
+```
+✅ PASS: initialSyncDone = true
+✅ PASS: lastCompletedWindowEnd = 2025-11-26T09:12:10.340Z
+✅ PASS: lastCompletedWindowEnd matches latest batch endTime
+✅ PASS: hasFailedBatches = false (no failures)
+
+⏱️  Not yet time for incremental sync (48 hours remaining)
+```
+
+**When to use:** After initial sync completes to verify v3 fields and test incremental sync readiness.
+
+---
+
 ## Overview
 
-This directory contains comprehensive test scripts to validate the Odoo Sync Engine v2 implementation. The tests verify that data flows correctly from Odoo through the sync engine into MongoDB.
+This directory contains comprehensive test scripts to validate the Odoo Sync Engine v3 implementation. The tests verify that data flows correctly from Odoo through the sync engine into MongoDB, and that incremental sync is configured properly.
 
 ## Test Configuration
 
@@ -459,6 +491,132 @@ Verify batch atomicity:
 3. Restart sync
 4. Failed batch should retry from scratch
 
+## v3 Incremental Sync
+
+### Overview
+
+V3 adds continuous incremental sync on top of v2's solid initial sync foundation:
+
+-   **Initial Sync**: Uses v2 engine to backfill historical data (e.g., last 90 days)
+-   **Incremental Sync**: Automatically creates new 24-hour windows to catch new/updated records
+-   **No Gaps**: `lastCompletedWindowEnd` ensures every change is captured
+
+### Key v3 Fields
+
+**OdooSyncStatus (per user):**
+
+-   `initialSyncDone`: `true` after initial sync completes
+-   `hasFailedBatches`: `true` if ANY batch fails (initial or incremental)
+-   `lastCompletedWindowEnd`: End time of last successfully synced window
+-   `lastProcessId`: Reference to most recent SyncSession (optional)
+
+**SyncSession (new collection):**
+
+-   Lightweight sync history logs
+-   Tracks: `type` (initial/incremental), `status`, batch counts
+-   Purpose: Debugging and customer-facing visibility
+
+### How Incremental Sync Works
+
+1. **After Initial Sync**:
+    - `initialSyncDone = true`
+    - `lastCompletedWindowEnd = <last batch endTime>`
+2. **Cron Checks Every 10 Seconds**:
+    - If `now >= lastCompletedWindowEnd + 24 hours`:
+        - Creates new batch for all modules
+        - Window: `lastCompletedWindowEnd` → `lastCompletedWindowEnd + 24h`
+3. **Batch Processes**:
+    - Uses same v2 ID-based pagination
+    - Updates `lastCompletedWindowEnd` on success
+4. **Continuous**:
+    - Next window automatically queued 24 hours later
+    - Runs forever in background
+
+### Testing Incremental Sync
+
+**Verify v3 Setup:**
+
+```bash
+npx tsx test-v3-incremental.js
+```
+
+Expected output shows:
+
+-   ✅ `initialSyncDone = true`
+-   ✅ `lastCompletedWindowEnd` set and matches latest batch
+-   ⏱️ Time remaining until next incremental window
+
+**Test Incremental Generation:**
+
+1. Run initial sync: `npx tsx test-complete-sync.js`
+2. Verify v3 fields: `npx tsx test-v3-incremental.js`
+3. Wait 24 hours or manually advance `lastCompletedWindowEnd` in MongoDB
+4. Trigger cron or call `OdooSyncService.generateIncrementalBatches(userId)`
+5. Verify new batches created with correct time window
+
+**Manual Time Travel Test:**
+
+```javascript
+// In MongoDB shell or script
+db.odoosyncstatuses.updateOne(
+    { userId: "your-user-id" },
+    { $set: { lastCompletedWindowEnd: new Date(Date.now() - 25 * 60 * 60 * 1000) } }
+);
+// Now 25 hours ago, should trigger incremental batch creation
+```
+
+### v3 Behavior Rules
+
+✅ **DO:**
+
+-   Use `lastCompletedWindowEnd` as single source of truth
+-   Create fixed 24-hour incremental windows
+-   Process incremental batches same as initial (ID pagination, upsert, all-or-nothing)
+-   Set `hasFailedBatches = true` on any failure
+
+❌ **DON'T:**
+
+-   Store cursors (lastId, offset, continuation tokens)
+-   Use adaptive/shrinking windows
+-   Skip or overlap windows
+-   Process incremental differently than initial
+
+### Incremental Sync Monitoring
+
+**Check Sync Status:**
+
+```bash
+# In MongoDB
+db.odoosyncstatuses.find({ userId: "your-user-id" }).pretty()
+```
+
+Look for:
+
+-   `initialSyncDone: true`
+-   `lastCompletedWindowEnd` advancing every 24 hours
+-   `hasFailedBatches: false` (no failures)
+
+**Check Recent Batches:**
+
+```bash
+db.odoosyncbatches.find({ userId: "your-user-id" })
+    .sort({ createdAt: -1 })
+    .limit(10)
+    .pretty()
+```
+
+Should see new batches created every 24 hours after `lastCompletedWindowEnd`.
+
+**View SyncSession History (future):**
+
+```bash
+db.syncsessions.find({ userId: "your-user-id" })
+    .sort({ startAt: -1 })
+    .pretty()
+```
+
+Shows history of all sync runs (initial and incremental).
+
 ## Next Steps
 
 After successful tests:
@@ -467,7 +625,9 @@ After successful tests:
 2. ✅ Enable automated cron sync
 3. ✅ Monitor production sync in dashboard
 4. ✅ Set up alerts for failed batches
-5. ✅ Plan for incremental sync (new data only)
+5. ✅ **V3: Verify incremental sync runs continuously**
+6. ✅ **V3: Monitor `lastCompletedWindowEnd` advances daily**
+7. ✅ **V3: Optional: Implement SyncSession UI for visibility**
 
 ## Support
 
@@ -479,3 +639,11 @@ If tests fail:
 4. Verify network connectivity
 5. Confirm Odoo credentials
 6. See "Common Issues" section above
+7. **V3: Check `initialSyncDone` and `lastCompletedWindowEnd` are set correctly**
+
+---
+
+**Last Updated:** November 25, 2025  
+**Sync Engine Version:** V3 (Incremental Sync)  
+**Odoo Version:** Community Edition
+

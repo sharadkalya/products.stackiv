@@ -217,6 +217,9 @@ export class OdooSyncService {
             batch.recordCountExpected = allRecords.length;
             await batch.save();
 
+            // v3: Update lastCompletedWindowEnd for incremental sync
+            await this.updateLastCompletedWindow(userId, batch.endTime);
+
             // Create next batch if there's more data to sync
             const now = new Date();
             if (batch.endTime < now) {
@@ -259,6 +262,15 @@ export class OdooSyncService {
                 }
                 batch.lastError = error instanceof Error ? error.message : 'Unknown error';
                 await batch.save();
+
+                // v3: Set hasFailedBatches flag
+                await OdooSyncStatus.findOneAndUpdate(
+                    { userId },
+                    {
+                        hasFailedBatches: true,
+                        lastSyncFailedAt: new Date(),
+                    },
+                );
             }
 
             return false;
@@ -266,7 +278,11 @@ export class OdooSyncService {
     }
 
     /**
-     * Check if all batches are complete and update sync status
+     * Check if all batches are complete and update sync status (v3)
+     * 
+     * When initial sync completes:
+     * - Sets initialSyncDone = true
+     * - Sets lastCompletedWindowEnd to the latest batch endTime
      */
     private static async checkSyncCompletion(userId: string): Promise<void> {
         const pendingBatches = await OdooSyncBatch.countDocuments({
@@ -294,13 +310,41 @@ export class OdooSyncService {
             // All batches are either done or permanently failed
             console.log(`[OdooSync] Sync complete for user ${userId}`);
 
-            await OdooSyncStatus.findOneAndUpdate(
-                { userId },
-                {
+            // v3: Check if this is initial sync completion
+            const syncStatus = await OdooSyncStatus.findOne({ userId });
+            if (syncStatus && !syncStatus.initialSyncDone) {
+                // Find the latest batch endTime to set as lastCompletedWindowEnd
+                const latestBatch = await OdooSyncBatch.findOne({
+                    userId,
+                    status: 'done',
+                })
+                    .sort({ endTime: -1 })
+                    .limit(1);
+
+                const updateFields: any = {
                     syncStatus: 'done',
                     lastSyncCompletedAt: new Date(),
-                },
-            );
+                    initialSyncDone: true,
+                };
+
+                if (latestBatch) {
+                    updateFields.lastCompletedWindowEnd = latestBatch.endTime;
+                    console.log(
+                        `[OdooSync] Initial sync complete for user ${userId}. lastCompletedWindowEnd set to ${latestBatch.endTime.toISOString()}`,
+                    );
+                }
+
+                await OdooSyncStatus.findOneAndUpdate({ userId }, updateFields);
+            } else {
+            // This is an incremental sync completion
+                await OdooSyncStatus.findOneAndUpdate(
+                    { userId },
+                    {
+                        syncStatus: 'done',
+                        lastSyncCompletedAt: new Date(),
+                    },
+                );
+            }
         }
     }
 
@@ -339,5 +383,78 @@ export class OdooSyncService {
             pendingBatches,
             progressPercentage,
         };
+    }
+
+    /**
+     * v3: Update lastCompletedWindowEnd when a batch completes successfully
+     */
+    private static async updateLastCompletedWindow(userId: string, windowEndTime: Date): Promise<void> {
+        const syncStatus = await OdooSyncStatus.findOne({ userId });
+
+        // Only update if this window end is later than current lastCompletedWindowEnd
+        if (!syncStatus?.lastCompletedWindowEnd || windowEndTime > syncStatus.lastCompletedWindowEnd) {
+            await OdooSyncStatus.findOneAndUpdate(
+                { userId },
+                { lastCompletedWindowEnd: windowEndTime },
+            );
+        }
+    }
+
+    /**
+     * v3: Generate incremental sync batches if needed
+     * Called when initialSyncDone = true
+     */
+    static async generateIncrementalBatches(userId: string): Promise<number> {
+        const syncStatus = await OdooSyncStatus.findOne({ userId });
+
+        if (!syncStatus || !syncStatus.initialSyncDone || !syncStatus.lastCompletedWindowEnd) {
+            return 0;
+        }
+
+        const now = new Date();
+        const lastCompleted = syncStatus.lastCompletedWindowEnd;
+        const windowMs = SYNC_CONFIG.WINDOW_HOURS * 60 * 60 * 1000;
+
+        // Check if it's time for a new incremental window
+        if (now.getTime() < lastCompleted.getTime() + windowMs) {
+            return 0; // Not yet time for next window
+        }
+
+        // Generate next incremental batch for each module
+        let batchesCreated = 0;
+        const nextStartTime = lastCompleted;
+        const nextEndTime = addHours(nextStartTime, SYNC_CONFIG.WINDOW_HOURS);
+
+        for (const odooModule of SYNC_CONFIG.SUPPORTED_MODULES) {
+            // Check if batch already exists for this window
+            const existingBatch = await OdooSyncBatch.findOne({
+                userId,
+                module: odooModule,
+                startTime: nextStartTime,
+                endTime: nextEndTime,
+            });
+
+            if (!existingBatch) {
+                await OdooSyncBatch.create({
+                    userId,
+                    module: odooModule,
+                    startTime: nextStartTime,
+                    endTime: nextEndTime,
+                    status: 'not_started',
+                    attempts: 0,
+                });
+
+                console.log(
+                    `[OdooSync] Created incremental batch for ${MODULE_DISPLAY_NAMES[odooModule]}: ${nextStartTime.toISOString()} to ${nextEndTime.toISOString()}`,
+                );
+                batchesCreated++;
+            }
+        }
+
+        if (batchesCreated > 0) {
+            console.log(`[OdooSync] Generated ${batchesCreated} incremental batches for user ${userId}`);
+        }
+
+        return batchesCreated;
     }
 }

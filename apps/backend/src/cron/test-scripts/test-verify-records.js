@@ -8,11 +8,11 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 
-import { OdooSaleOrder } from './src/models/odooSaleOrder.model';
-import { OdooInvoice } from './src/models/odooInvoice.model';
-import { OdooContact } from './src/models/odooContact.model';
-import { OdooEmployee } from './src/models/odooEmployee.model';
-import { OdooSyncBatch } from './src/models/odooSyncBatch.model';
+import { OdooSaleOrder } from '../../models/odooSaleOrder.model';
+import { OdooInvoice } from '../../models/odooInvoice.model';
+import { OdooContact } from '../../models/odooContact.model';
+import { OdooEmployee } from '../../models/odooEmployee.model';
+import { OdooSyncBatch } from '../../models/odooSyncBatch.model';
 
 dotenv.config();
 

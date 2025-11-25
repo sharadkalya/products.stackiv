@@ -8,7 +8,12 @@
         "build": "tsc -b",
         "start": "node --max-old-space-size=512 -r ts-node/register -r tsconfig-paths/register src/index.ts",
         "cron:dev": "ts-node-dev --respawn --transpile-only --ignore-watch node_modules --require tsconfig-paths/register src/cron/odooSyncCron.ts",
-        "cron:start": "node --max-old-space-size=512 -r ts-node/register -r tsconfig-paths/register src/cron/odooSyncCron.ts"
+        "cron:start": "node --max-old-space-size=512 -r ts-node/register -r tsconfig-paths/register src/cron/odooSyncCron.ts",
+        "test:complete": "npx tsx src/cron/test-scripts/test-complete-sync.js",
+        "test:v3": "npx tsx src/cron/test-scripts/test-v3-incremental.js",
+        "test:verify": "npx tsx src/cron/test-scripts/test-verify-records.js",
+        "test:clear": "npx tsx src/cron/test-scripts/clear-data.js",
+        "test:manual": "npx tsx src/cron/test-scripts/manual-process.js"
     },
     "dependencies": {
         "@pinecone-database/pinecone": "^6.1.2",

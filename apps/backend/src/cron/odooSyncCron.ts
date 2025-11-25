@@ -32,17 +32,18 @@ async function runSyncCycle() {
     try {
         console.log(`\n[OdooSyncCron] === Cycle #${cycleCount} starting ===`);
 
-        // Find users that need sync preparation (including pending from dashboard init and failed to retry)
+        // v3: Case A - Find users that need initial sync preparation
         const usersNeedingPrep = await OdooSyncStatus.find({
             connectionInfoAvailable: true,
             syncStatus: { $in: ['not_started', 'pending', 'failed'] },
+            initialSyncDone: false, // Only users who haven't completed initial sync
         });
 
-        console.log(`[OdooSyncCron] Users needing prep: ${usersNeedingPrep.length}`);
+        console.log(`[OdooSyncCron] Users needing initial sync prep: ${usersNeedingPrep.length}`);
 
         for (const userStatus of usersNeedingPrep) {
             try {
-                console.log(`[OdooSyncCron] Preparing sync for user ${userStatus.userId} (status: ${userStatus.syncStatus})...`);
+                console.log(`[OdooSyncCron] Preparing initial sync for user ${userStatus.userId} (status: ${userStatus.syncStatus})...`);
                 await OdooSyncService.prepareSync(userStatus.userId);
             } catch (error) {
                 console.error(
@@ -52,27 +53,62 @@ async function runSyncCycle() {
             }
         }
 
-        // Find users with in-progress syncs
+        // v3: Case B - Generate incremental batches for users who completed initial sync
+        const usersForIncremental = await OdooSyncStatus.find({
+            connectionInfoAvailable: true,
+            initialSyncDone: true,
+            syncStatus: { $in: ['done', 'in_progress'] }, // Users with completed or ongoing sync
+        });
+
+        console.log(`[OdooSyncCron] Users ready for incremental sync: ${usersForIncremental.length}`);
+
+        for (const userStatus of usersForIncremental) {
+            try {
+                const batchesCreated = await OdooSyncService.generateIncrementalBatches(userStatus.userId);
+                if (batchesCreated > 0) {
+                    console.log(`[OdooSyncCron] Generated ${batchesCreated} incremental batches for user ${userStatus.userId}`);
+                }
+            } catch (error) {
+                console.error(
+                    `[OdooSyncCron] Failed to generate incremental batches for user ${userStatus.userId}:`,
+                    error,
+                );
+            }
+        }
+
+        // Find users with in-progress syncs (both initial and incremental)
         const usersInProgress = await OdooSyncStatus.find({
             syncStatus: 'in_progress',
         });
 
         console.log(`[OdooSyncCron] Users in progress: ${usersInProgress.length}`);
 
-        for (const userStatus of usersInProgress) {
-            try {
-                console.log(`[OdooSyncCron] Processing batch for user ${userStatus.userId}...`);
-                // Process one batch for this user
-                const processed = await OdooSyncService.processNextBatch(userStatus.userId);
-                if (!processed) {
-                    console.log(`[OdooSyncCron] No more batches for user ${userStatus.userId}`);
-                }
-            } catch (error) {
-                console.error(
-                    `[OdooSyncCron] Failed to process batch for user ${userStatus.userId}:`,
-                    error,
-                );
-            }
+        // Process batches in parallel with concurrency control from config
+        const CONCURRENT_LIMIT = SYNC_CONFIG.CONCURRENT_USER_LIMIT;
+
+        for (let i = 0; i < usersInProgress.length; i += CONCURRENT_LIMIT) {
+            const userBatch = usersInProgress.slice(i, i + CONCURRENT_LIMIT);
+            const batchNumber = Math.floor(i / CONCURRENT_LIMIT) + 1;
+            const totalBatches = Math.ceil(usersInProgress.length / CONCURRENT_LIMIT);
+
+            console.log(`[OdooSyncCron] Processing user batch ${batchNumber}/${totalBatches} (${userBatch.length} users concurrently)`);
+
+            await Promise.all(
+                userBatch.map(async (userStatus) => {
+                    try {
+                        console.log(`[OdooSyncCron] Processing batch for user ${userStatus.userId}...`);
+                        const processed = await OdooSyncService.processNextBatch(userStatus.userId);
+                        if (!processed) {
+                            console.log(`[OdooSyncCron] No more batches for user ${userStatus.userId}`);
+                        }
+                    } catch (error) {
+                        console.error(
+                            `[OdooSyncCron] Failed to process batch for user ${userStatus.userId}:`,
+                            error,
+                        );
+                    }
+                }),
+            );
         }
 
         console.log(`[OdooSyncCron] === Cycle #${cycleCount} complete ===\n`);

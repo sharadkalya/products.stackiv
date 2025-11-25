@@ -43,6 +43,14 @@ export const SYNC_CONFIG = {
     CRON_SCHEDULE: '*/10 * * * * *',
 
     /**
+     * Number of users to process concurrently in each cron cycle
+     * Higher = faster processing but more memory usage
+     * Lower = slower but more memory efficient
+     * Recommended: 10-20 for most deployments
+     */
+    CONCURRENT_USER_LIMIT: 10,
+
+    /**
      * List of Odoo modules supported for synchronization
      * Only these modules will be synced from Odoo
      */

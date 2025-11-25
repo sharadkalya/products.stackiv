@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import { OdooSyncService } from './src/services/odooSync.service';
+import { OdooSyncService } from '../../services/odooSync.service';
 
 dotenv.config();
 
