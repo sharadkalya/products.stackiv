@@ -32,10 +32,10 @@ async function runSyncCycle() {
     try {
         console.log(`\n[OdooSyncCron] === Cycle #${cycleCount} starting ===`);
 
-        // Find users that need sync preparation (including failed ones to retry)
+        // Find users that need sync preparation (including pending from dashboard init and failed to retry)
         const usersNeedingPrep = await OdooSyncStatus.find({
             connectionInfoAvailable: true,
-            syncStatus: { $in: ['not_started', 'failed'] },
+            syncStatus: { $in: ['not_started', 'pending', 'failed'] },
         });
 
         console.log(`[OdooSyncCron] Users needing prep: ${usersNeedingPrep.length}`);

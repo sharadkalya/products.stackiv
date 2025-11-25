@@ -4,8 +4,6 @@ import { OdooSyncBatch, BatchStatus } from '@/models/odooSyncBatch.model';
 import { OdooSyncStatus } from '@/models/odooSyncStatus.model';
 import { ModuleDataWriterService } from '@/services/moduleDataWriter.service';
 import { OdooClientService, OdooConnection } from '@/services/odooClient.service';
-import { WindowSizerService } from '@/services/windowSizer.service';
-import { sleep } from '@/utils/sleep';
 import { addDays, addHours } from '@/utils/time';
 
 /**
@@ -55,7 +53,7 @@ export class OdooSyncService {
             const initialStartTime = addDays(now, -SYNC_CONFIG.INITIAL_SYNC_RANGE_DAYS);
 
             for (const odooModule of SYNC_CONFIG.SUPPORTED_MODULES) {
-                const initialEndTime = addHours(initialStartTime, SYNC_CONFIG.MAX_WINDOW_HOURS);
+                const initialEndTime = addHours(initialStartTime, SYNC_CONFIG.WINDOW_HOURS);
 
                 await OdooSyncBatch.create({
                     userId,
@@ -98,11 +96,10 @@ export class OdooSyncService {
     }
 
     /**
-     * Process the next batch for a user
+     * Process the next batch for a user (v2)
      * - Finds next eligible batch
-     * - Shrinks window to safe size
-     * - Fetches and validates records
-     * - Writes to database
+     * - Uses fetchAllRecordsForWindow with ID-based pagination
+     * - Implements all-or-nothing batch processing
      * - Creates next batch if needed
      */
     static async processNextBatch(userId: string): Promise<boolean> {
@@ -157,28 +154,23 @@ export class OdooSyncService {
                 password: connectionDetails.password,
             };
 
-            // Shrink window to safe size
-            const windowResult = await WindowSizerService.shrinkWindow(
+            // v2: Use ID-based pagination to fetch ALL records in the fixed window
+            // This never fails due to density and handles CSV imports correctly
+            const allRecords = await OdooClientService.fetchAllRecordsForWindow(
                 conn,
                 batch.module,
                 batch.startTime,
                 batch.endTime,
             );
 
-            if (!windowResult.success || !windowResult.window) {
-                throw new Error(windowResult.error || 'Failed to shrink window');
-            }
-
-            const { startTime, endTime, recordCount } = windowResult.window;
-            batch.recordCountExpected = recordCount;
-
             console.log(
-                `[OdooSync] Window shrunk to ${recordCount} records (${startTime.toISOString()} to ${endTime.toISOString()})`,
+                `[OdooSync] Fetched ${allRecords.length} records for ${MODULE_DISPLAY_NAMES[batch.module]} using ID-based pagination`,
             );
 
             // If no records in this window, mark as done and create next batch immediately
-            if (recordCount === 0) {
+            if (allRecords.length === 0) {
                 batch.status = 'done';
+                batch.recordCountExpected = 0;
                 await batch.save();
 
                 console.log(
@@ -187,9 +179,9 @@ export class OdooSyncService {
 
                 // Create next batch if there's more data to sync
                 const now = new Date();
-                if (endTime < now) {
-                    const nextStartTime = endTime;
-                    const nextEndTime = addHours(nextStartTime, SYNC_CONFIG.MAX_WINDOW_HOURS);
+                if (batch.endTime < now) {
+                    const nextStartTime = batch.endTime;
+                    const nextEndTime = addHours(nextStartTime, SYNC_CONFIG.WINDOW_HOURS);
 
                     await OdooSyncBatch.create({
                         userId,
@@ -211,44 +203,25 @@ export class OdooSyncService {
                 return true;
             }
 
-            // Sleep to avoid rate limiting
-            await sleep(SYNC_CONFIG.API_CALL_DELAY_MS);
-
-            // Fetch records
-            const records = await OdooClientService.fetchRecords(
-                conn,
-                batch.module,
-                startTime,
-                endTime,
-                SYNC_CONFIG.LIMIT_PER_CALL,
-            );
-
-            // Validate record count
-            if (records.length !== recordCount) {
-                throw new Error(
-                    `Record count mismatch: expected ${recordCount}, got ${records.length}`,
-                );
-            }
-
-            // Sleep again before write
-            await sleep(SYNC_CONFIG.API_CALL_DELAY_MS);
-
-            // Write records to database
-            await ModuleDataWriterService.upsertRecords(userId, batch.module, records);
+            // v2: All-or-nothing write
+            // If this fails, we discard all records and mark batch as failed
+            // The upsert strategy ensures no duplicates on retry
+            await ModuleDataWriterService.upsertRecords(userId, batch.module, allRecords);
 
             console.log(
-                `[OdooSync] Successfully wrote ${records.length} records for ${MODULE_DISPLAY_NAMES[batch.module]}`,
+                `[OdooSync] Successfully wrote ${allRecords.length} records for ${MODULE_DISPLAY_NAMES[batch.module]}`,
             );
 
             // Mark batch as done
             batch.status = 'done';
+            batch.recordCountExpected = allRecords.length;
             await batch.save();
 
             // Create next batch if there's more data to sync
             const now = new Date();
-            if (endTime < now) {
-                const nextStartTime = endTime;
-                const nextEndTime = addHours(nextStartTime, SYNC_CONFIG.MAX_WINDOW_HOURS);
+            if (batch.endTime < now) {
+                const nextStartTime = batch.endTime;
+                const nextEndTime = addHours(nextStartTime, SYNC_CONFIG.WINDOW_HOURS);
 
                 await OdooSyncBatch.create({
                     userId,
@@ -271,6 +244,7 @@ export class OdooSyncService {
         } catch (error) {
             console.error(`[OdooSync] Error processing batch for user ${userId}:`, error);
 
+            // v2: All-or-nothing - on error, discard all fetched data
             // Update batch with error
             const batch = await OdooSyncBatch.findOne({
                 userId,

@@ -1,7 +1,7 @@
 import * as xmlrpc from 'xmlrpc';
 
 import { MODULE_FIELDS } from '@/config/moduleFields.config';
-import { SupportedModule } from '@/config/sync.config';
+import { SYNC_CONFIG, SupportedModule } from '@/config/sync.config';
 import { formatForOdoo } from '@/utils/time';
 
 export interface OdooConnection {
@@ -179,6 +179,86 @@ export class OdooClientService {
                 },
             );
         });
+    }
+
+    /**
+     * v2: Fetch ALL records for a fixed time window using ID-based pagination
+     * This is the canonical implementation per v2 spec section 5
+     * 
+     * @returns All records in the window, fetched via stable ID pagination
+     * @throws Error if any API call fails
+     * 
+     * Features:
+     * - ID-based pagination (id > lastId)
+     * - Ordered by id asc for deterministic results
+     * - In-memory only, never writes to DB
+     * - Loops until no more records
+     * - Respects API_CALL_DELAY_MS between calls
+     */
+    static async fetchAllRecordsForWindow(
+        conn: OdooConnection,
+        module: SupportedModule,
+        startTime: Date,
+        endTime: Date,
+    ): Promise<any[]> {
+        const allRows: any[] = [];
+        let lastId = 0;
+        const limit = SYNC_CONFIG.LIMIT_PER_CALL;
+
+        // Fetch module-specific fields
+        const fields: string[] = MODULE_FIELDS[module] || [
+            'id',
+            'display_name',
+            'name',
+            'create_date',
+            'write_date',
+        ];
+
+        while (true) {
+            // Domain filter: write_date in range AND id > lastId
+            const domain = [
+                '&',
+                '&',
+                ['write_date', '>=', formatForOdoo(startTime)],
+                ['write_date', '<', formatForOdoo(endTime)],
+                ['id', '>', lastId],
+            ];
+
+            const rows = await new Promise<any[]>((resolve, reject) => {
+                this.authenticateAndExecute(
+                    conn,
+                    module,
+                    'search_read',
+                    [domain, fields],
+                    { limit, order: 'id asc' },
+                    (error: any, records: any) => {
+                        if (error) {
+                            reject(new Error(`Failed to fetch records: ${error.message}`));
+                            return;
+                        }
+                        resolve(records as any[]);
+                    },
+                );
+            });
+
+            // No more records, we're done
+            if (rows.length === 0) {
+                break;
+            }
+
+            // Accumulate records
+            allRows.push(...rows);
+
+            // Update lastId to the maximum ID in this batch
+            lastId = Math.max(...rows.map((row: any) => row.id));
+
+            // Respect API rate limiting
+            if (SYNC_CONFIG.API_CALL_DELAY_MS > 0) {
+                await new Promise((resolve) => setTimeout(resolve, SYNC_CONFIG.API_CALL_DELAY_MS));
+            }
+        }
+
+        return allRows;
     }
 
     /**

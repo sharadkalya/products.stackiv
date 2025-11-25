@@ -8,8 +8,9 @@
 export const SYNC_CONFIG = {
     /**
      * Maximum number of records to fetch in a single Odoo API call
+     * v2: Used for ID-based pagination limit
      */
-    LIMIT_PER_CALL: 1000,
+    LIMIT_PER_CALL: 200,
 
     /**
      * Maximum number of attempts for a failed batch before marking it as permanently failed
@@ -19,20 +20,15 @@ export const SYNC_CONFIG = {
     /**
      * Number of days to look back for the initial sync
      * E.g., 90 means sync data from the last 90 days
+     * Set to 3 for testing purposes
      */
-    INITIAL_SYNC_RANGE_DAYS: 2,
+    INITIAL_SYNC_RANGE_DAYS: 3,
 
     /**
-     * Minimum time window size in minutes
-     * If a batch window becomes smaller than this, the data is too dense
+     * Fixed time window size in hours for each batch
+     * v2: Windows are now fixed and never shrink or adapt
      */
-    MIN_WINDOW_MINUTES: 1,
-
-    /**
-     * Maximum time window size in hours
-     * Each batch starts with this window size
-     */
-    MAX_WINDOW_HOURS: 24,
+    WINDOW_HOURS: 24,
 
     /**
      * Delay between API calls in milliseconds to avoid rate limiting

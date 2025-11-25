@@ -61,11 +61,7 @@ export const MODULE_FIELDS: Record<SupportedModule, string[]> = {
         'invoice_count',
         'invoice_status', // to invoice, invoiced, no
 
-        // Delivery
-        'picking_ids', // Delivery orders
-        'delivery_count',
-
-        // Signature
+        // Signature and payment
         'require_signature',
         'require_payment',
         'signed_by',
@@ -105,15 +101,8 @@ export const MODULE_FIELDS: Record<SupportedModule, string[]> = {
 
         // Invoice details
         'ref', // Vendor reference
-        'invoice_origin', // Source document
-        'invoice_payment_ref', // Payment reference
         'narration', // Terms and conditions
         'invoice_line_ids', // Invoice lines
-
-        // Payment
-        'payment_reference', // Payment reference
-        'invoice_payment_term_id', // Payment terms
-        'amount_paid', // Amount paid
 
         // Company and journal
         'company_id',
@@ -173,8 +162,6 @@ export const MODULE_FIELDS: Record<SupportedModule, string[]> = {
         'industry_id', // Industry
 
         // Financial
-        'property_payment_term_id', // Payment terms
-        'property_account_position_id', // Fiscal position
         'credit_limit',
 
         // Company relation
@@ -255,18 +242,9 @@ export const MODULE_FIELDS: Record<SupportedModule, string[]> = {
         'employee_type', // employee, student, trainee, contractor, freelance
         'resource_calendar_id', // Working hours
 
-        // Identification
-        'identification_id', // ID number
-        'passport_id', // Passport number
+        // Identification (basic fields only - many don't exist in this Odoo version)
         'ssnid', // SSN
         'permit_no', // Work permit number
-
-        // Banking
-        'bank_account_id', // Bank account
-
-        // Emergency contact
-        'emergency_contact',
-        'emergency_phone',
 
         // Company and resource
         'company_id',
@@ -279,20 +257,5 @@ export const MODULE_FIELDS: Record<SupportedModule, string[]> = {
         // Notes
         'notes', // Notes
         'additional_note',
-
-        // Vehicle
-        'vehicle', // Company vehicle
-
-        // Certificates
-        'certificate', // Certificate level
-        'study_field', // Field of study
-        'study_school', // School
-
-        // Contract info
-        'visa_no', // Visa number
-        'visa_expire', // Visa expiry
-
-        // Distance and travel
-        'km_home_work', // Distance home-work
     ],
 };
