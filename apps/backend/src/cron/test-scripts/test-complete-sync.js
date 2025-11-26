@@ -11,6 +11,7 @@ import xmlrpc from 'xmlrpc';
 
 import { OdooSyncService } from '../../services/odooSync.service';
 import { OdooSaleOrder } from '../../models/odooSaleOrder.model';
+import { OdooSaleOrderLine } from '../../models/odooSaleOrderLine.model';
 import { OdooInvoice } from '../../models/odooInvoice.model';
 import { OdooContact } from '../../models/odooContact.model';
 import { OdooEmployee } from '../../models/odooEmployee.model';
@@ -167,6 +168,7 @@ async function verifyRecords() {
 
     const collections = [
         { model: OdooSaleOrder, name: 'Sales Orders', module: 'sale.order' },
+        { model: OdooSaleOrderLine, name: 'Sales Order Lines', module: 'sale.order.line' },
         { model: OdooInvoice, name: 'Invoices', module: 'account.move' },
         { model: OdooContact, name: 'Contacts', module: 'res.partner' },
         { model: OdooEmployee, name: 'Employees', module: 'hr.employee' },
@@ -213,6 +215,8 @@ async function verifyRecords() {
             // Check data richness
             if (collection.module === 'sale.order' && sample.amountTotal !== undefined) {
                 console.log(`   ✓ Has business data: Amount ${sample.amountTotal}, Partner ${sample.partnerName || sample.partnerId}`);
+            } else if (collection.module === 'sale.order.line' && sample.priceSubtotal !== undefined) {
+                console.log(`   ✓ Has business data: Product ${sample.productName || 'N/A'}, Qty ${sample.productUomQty || 'N/A'}, Price ${sample.priceSubtotal}`);
             } else if (collection.module === 'account.move' && sample.amountTotal !== undefined) {
                 console.log(`   ✓ Has business data: Amount ${sample.amountTotal}, State ${sample.state}`);
             } else if (collection.module === 'res.partner') {
@@ -281,7 +285,7 @@ async function verifyRecords() {
 async function clearAllData() {
     console.log('🗑️  Clearing previous data...');
 
-    const collections = ['odoosaleorders', 'odooinvoices', 'odoocontacts', 'odooemployees'];
+    const collections = ['odoosaleorders', 'odoosaleorderlines', 'odooinvoices', 'odoocontacts', 'odooemployees'];
     let totalDeleted = 0;
 
     for (const col of collections) {

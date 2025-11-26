@@ -56,6 +56,7 @@ export const SYNC_CONFIG = {
      */
     SUPPORTED_MODULES: [
         'sale.order',      // Sales Orders
+        'sale.order.line', // Sales Order Lines
         'account.move',    // Invoices
         'res.partner',     // Contacts/Partners
         'hr.employee',     // Employees
@@ -94,6 +95,7 @@ export type SupportedModule = (typeof SYNC_CONFIG.SUPPORTED_MODULES)[number];
  */
 export const MODULE_DISPLAY_NAMES: Record<SupportedModule, string> = {
     'sale.order': 'Sales Orders',
+    'sale.order.line': 'Sales Order Lines',
     'account.move': 'Invoices',
     'res.partner': 'Contacts',
     'hr.employee': 'Employees',
@@ -104,6 +106,7 @@ export const MODULE_DISPLAY_NAMES: Record<SupportedModule, string> = {
  */
 export const MODULE_TO_COLLECTION: Record<SupportedModule, string> = {
     'sale.order': 'odoosaleorders',
+    'sale.order.line': 'odoosaleorderlines',
     'account.move': 'odooinvoices',
     'res.partner': 'odoocontacts',
     'hr.employee': 'odooemployees',

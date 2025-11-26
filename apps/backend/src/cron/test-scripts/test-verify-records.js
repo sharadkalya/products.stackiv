@@ -9,6 +9,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 
 import { OdooSaleOrder } from '../../models/odooSaleOrder.model';
+import { OdooSaleOrderLine } from '../../models/odooSaleOrderLine.model';
 import { OdooInvoice } from '../../models/odooInvoice.model';
 import { OdooContact } from '../../models/odooContact.model';
 import { OdooEmployee } from '../../models/odooEmployee.model';
@@ -20,6 +21,7 @@ const USER_ID = 'aYPEyMA39LdyTktykmiQ0mkNh523';
 
 const COLLECTIONS = [
     { model: OdooSaleOrder, name: 'Sales Orders', module: 'sale.order' },
+    { model: OdooSaleOrderLine, name: 'Sales Order Lines', module: 'sale.order.line' },
     { model: OdooInvoice, name: 'Invoices', module: 'account.move' },
     { model: OdooContact, name: 'Contacts', module: 'res.partner' },
     { model: OdooEmployee, name: 'Employees', module: 'hr.employee' },
@@ -65,6 +67,8 @@ async function verifyCollection(model, displayName, moduleName) {
         // Show some module-specific fields to verify rich data
         if (moduleName === 'sale.order' && record.amountTotal !== undefined) {
             console.log(`       Amount: ${record.amountTotal} | Partner: ${record.partnerName || record.partnerId || 'N/A'}`);
+        } else if (moduleName === 'sale.order.line' && record.priceSubtotal !== undefined) {
+            console.log(`       Product: ${record.productName || 'N/A'} | Qty: ${record.productUomQty || 'N/A'} | Price: ${record.priceSubtotal}`);
         } else if (moduleName === 'account.move' && record.amountTotal !== undefined) {
             console.log(`       Amount: ${record.amountTotal} | State: ${record.state || 'N/A'}`);
         } else if (moduleName === 'res.partner') {

@@ -28,7 +28,7 @@ const OdooSyncBatchSchema: Schema = new Schema(
         module: {
             type: String,
             required: true,
-            enum: ['sale.order', 'account.move', 'res.partner', 'hr.employee'],
+            enum: ['sale.order', 'sale.order.line', 'account.move', 'res.partner', 'hr.employee'],
             index: true,
         },
         startTime: {

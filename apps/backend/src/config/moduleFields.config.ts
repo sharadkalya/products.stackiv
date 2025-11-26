@@ -68,6 +68,55 @@ export const MODULE_FIELDS: Record<SupportedModule, string[]> = {
         'signed_on',
     ],
 
+    'sale.order.line': [
+        // Core identification
+        'id',
+        'name', // Description
+        'display_name',
+        'create_date',
+        'write_date',
+
+        // Order reference
+        'order_id', // Sale order (many2one -> sale.order)
+        'order_partner_id', // Customer from order
+        'sequence', // Line sequence/position
+
+        // Product information
+        'product_id', // Product (many2one -> product.product)
+        'product_template_id', // Product template
+        'product_uom_qty', // Quantity
+        'product_uom', // Unit of measure
+        'qty_delivered', // Delivered quantity
+        'qty_invoiced', // Invoiced quantity
+        'qty_to_invoice', // Quantity to invoice
+
+        // Pricing
+        'price_unit', // Unit price
+        'price_subtotal', // Subtotal without tax
+        'price_total', // Total with tax
+        'price_tax', // Tax amount
+        'discount', // Discount percentage
+
+        // Financial
+        'currency_id', // Currency
+        'company_id', // Company
+
+        // Status
+        'state', // draft, sale, done, cancel
+        'invoice_status', // to invoice, invoiced, upselling
+
+        // Product details
+        'customer_lead', // Delivery lead time
+        'is_expense', // Is expense
+        'is_downpayment', // Is down payment
+
+        // Related documents
+        'invoice_lines', // Related invoice lines
+
+        // Salesperson
+        'salesman_id', // Salesperson
+    ],
+
     'account.move': [
         // Core identification
         'id',
