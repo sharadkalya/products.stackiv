@@ -2,6 +2,7 @@
 import { Provider } from 'react-redux';
 import { store } from 'shared-redux';
 
+import { AuthProvider } from '@hosts/components/AuthProvider';
 import { I18nProvider } from '@hosts/components/I18nProvider';
 
 export default function App({
@@ -12,7 +13,9 @@ export default function App({
     return (
         <I18nProvider>
             <Provider store={store}>
-                {children}
+                <AuthProvider>
+                    {children}
+                </AuthProvider>
             </Provider>
         </I18nProvider>
     );

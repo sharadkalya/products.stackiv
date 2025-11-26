@@ -1,7 +1,17 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { signupAction } from './authActions';
+import { signupAction, loginAction, loginViaGoogleAction } from './authActions';
 import { User } from 'shared-types';
-import { handleSignupFulfilled, handleSignupPending, handleSignupRejected } from './authReducer';
+import {
+    handleSignupFulfilled,
+    handleSignupPending,
+    handleSignupRejected,
+    handleLoginFulfilled,
+    handleLoginPending,
+    handleLoginRejected,
+    handleLoginViaGoogleFulfilled,
+    handleLoginViaGooglePending,
+    handleLoginViaGoogleRejected
+} from './authReducer';
 
 export interface AuthState {
     user: User | null;
@@ -18,13 +28,31 @@ const initialState: AuthState = {
 const authSlice = createSlice({
     name: 'auth',
     initialState,
-    reducers: {},
+    reducers: {
+        setUser: (state, action) => {
+            state.user = action.payload;
+            state.loading = false;
+            state.error = null;
+        },
+        logout: (state) => {
+            state.user = null;
+            state.loading = false;
+            state.error = null;
+        },
+    },
     extraReducers: (builder) => {
         builder
             .addCase(signupAction.pending, handleSignupPending)
             .addCase(signupAction.fulfilled, handleSignupFulfilled)
-            .addCase(signupAction.rejected, handleSignupRejected);
+            .addCase(signupAction.rejected, handleSignupRejected)
+            .addCase(loginAction.pending, handleLoginPending)
+            .addCase(loginAction.fulfilled, handleLoginFulfilled)
+            .addCase(loginAction.rejected, handleLoginRejected)
+            .addCase(loginViaGoogleAction.pending, handleLoginViaGooglePending)
+            .addCase(loginViaGoogleAction.fulfilled, handleLoginViaGoogleFulfilled)
+            .addCase(loginViaGoogleAction.rejected, handleLoginViaGoogleRejected);
     },
 });
 
+export const { setUser, logout } = authSlice.actions;
 export default authSlice.reducer;

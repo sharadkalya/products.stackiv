@@ -14,4 +14,5 @@ export interface User {
     lastName?: string;
     phoneNumber?: number;
     verified?: boolean;
+    orgName?: string;
 };

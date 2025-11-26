@@ -1,3 +1,4 @@
 // Configuration for API endpoints
-
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5001/api';
+// Using relative path so requests go through Next.js proxy (same origin)
+// This ensures cookies are properly shared between frontend and backend
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '/api';

@@ -1,5 +1,5 @@
 /**
- * Step definitions for StayInn UI automation using Cucumber and Playwright/Puppeteer.
+ * Step definitions for Stackiv UI automation using Cucumber and Playwright/Puppeteer.
  * Handles browser setup/teardown and step logic for homepage navigation and title verification.
  */
 

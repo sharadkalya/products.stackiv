@@ -17,6 +17,14 @@
         "editor.tabSize": 4,
         "editor.insertSpaces": true
     },
+    "[typescriptreact]": {
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true,
+        "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+        "editor.codeActionsOnSave": {
+            "source.fixAll.eslint": "explicit"
+        }
+    },
     "[json]": {
         "editor.tabSize": 4,
         "editor.insertSpaces": true
@@ -27,14 +35,9 @@
     },
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "cSpell.words": [
-        "stackiv"
-    ],
+    "cSpell.words": ["stackiv"],
     // ESLint configuration for monorepo
-    "eslint.workingDirectories": [
-        "./apps/hosts",
-        "./apps/backend"
-    ],
+    "eslint.workingDirectories": ["./apps/hosts", "./apps/backend"],
     "eslint.validate": [
         "javascript",
         "javascriptreact",
@@ -42,5 +45,6 @@
         "typescriptreact"
     ],
     "eslint.run": "onType",
-    "eslint.enable": true
+    "eslint.enable": true,
+    "eslint.format.enable": true
 }

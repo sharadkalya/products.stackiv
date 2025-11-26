@@ -21,7 +21,7 @@ export const loginAction = createAsyncThunk('auth/login', async (payload: LoginP
     }
 });
 
-export const loginViaGoogleAction = createAsyncThunk('auth/login', async (payload: LoginPayload, thunkAPI) => {
+export const loginViaGoogleAction = createAsyncThunk('auth/loginViaGoogle', async (payload: LoginPayload, thunkAPI) => {
     try {
         const user = await loginViaGoogle(payload);
         return user;

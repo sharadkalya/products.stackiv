@@ -165,9 +165,43 @@ export const loginViaGoogle = async (req: Request, res: Response) => {
     }
 };
 
-export const logout = async (req: Request, res: Response) => {
-    res.clearCookie('Authorization', commonCookieOptions);
-    res.clearCookie('RefreshToken', commonCookieOptions);
+export const getCurrentUser = async (req: Request, res: Response) => {
+    try {
+        // User is already attached to req by JWT middleware
+        if (!req.user) {
+            unauthorized(res, 'Not authenticated');
+            return;
+        }
 
-    res.status(200).json({ message: 'Logged out successfully' });
+        // JWT middleware only provides partial user data (firebaseUid, email, roles)
+        // Fetch the complete user record from the database
+        const fullUser = await findUserByFirebaseUid(req.user.firebaseUid);
+
+        if (!fullUser) {
+            unauthorized(res, 'User not found');
+            return;
+        }
+
+        res.status(200).json({ user: fullUser });
+    } catch (error) {
+        console.error('Error in getCurrentUser:', error);
+        internalError(res, 'Internal server error');
+    }
+};
+
+export const logout = async (req: Request, res: Response) => {
+    try {
+    // Clear both auth cookies with proper options
+        res.clearCookie('Authorization', commonCookieOptions);
+        res.clearCookie('RefreshToken', {
+            ...commonCookieOptions,
+            maxAge: 7 * 24 * 60 * 60 * 1000, // Match the original maxAge for proper clearing
+        });
+
+        res.status(200).json({ message: 'Logged out successfully' });
+    } catch (error) {
+        console.error('Error in logout:', error);
+        // Still return success even if there's an error, as cookies may already be cleared
+        res.status(200).json({ message: 'Logged out successfully' });
+    }
 };
