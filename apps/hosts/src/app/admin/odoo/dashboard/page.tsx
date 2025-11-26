@@ -103,9 +103,11 @@ export default function AdminDashboardPage() {
 
     const getStatusBadge = (status: string) => {
         const statusMap: Record<string, string> = {
+            // eslint-disable-next-line camelcase
             in_progress: 'badge-info',
             completed: 'badge-success',
             failed: 'badge-error',
+            // eslint-disable-next-line camelcase
             not_started: 'badge-warning',
         };
         return statusMap[status] || 'badge-neutral';

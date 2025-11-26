@@ -24,7 +24,6 @@ export default function SocialLogin() {
             };
             await dispatch(loginViaGoogleAction(action));
             const redirect = searchParams.get('redirect') || '/';
-            console.log('redirect url is', redirect);
             router.replace(redirect);
         }
 
