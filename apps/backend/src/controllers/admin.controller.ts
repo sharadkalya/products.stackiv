@@ -6,7 +6,7 @@ import { OdooConnectionDetails } from '@/models/odoo.model';
 /**
  * Get sync history with pagination and search
  */
-export async function getSyncHistory(req: Request, res: Response) {
+export async function getSyncHistory(req: Request, res: Response): Promise<void> {
     try {
         const page = parseInt(req.query.page as string) || 1;
         const limit = 25;
@@ -92,17 +92,18 @@ export async function getSyncHistory(req: Request, res: Response) {
 /**
  * Get sync history details by ID
  */
-export async function getSyncHistoryById(req: Request, res: Response) {
+export async function getSyncHistoryById(req: Request, res: Response): Promise<void> {
     try {
         const { id } = req.params;
 
         const syncStatus = await OdooSyncStatus.findById(id).lean();
 
         if (!syncStatus) {
-            return res.status(404).json({
+            res.status(404).json({
                 success: false,
                 message: 'Sync history not found',
             });
+            return;
         }
 
         // Get connection details

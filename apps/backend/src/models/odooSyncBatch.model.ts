@@ -13,6 +13,7 @@ export interface IOdooSyncBatch extends Document {
     attempts: number;
     recordCountExpected?: number;
     lastError?: string;
+    lastProcessedId?: number;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -56,6 +57,9 @@ const OdooSyncBatchSchema: Schema = new Schema(
         },
         lastError: {
             type: String,
+        },
+        lastProcessedId: {
+            type: Number,
         },
     },
     {

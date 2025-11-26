@@ -6,7 +6,7 @@ import { OdooSyncService } from '@/services/odooSync.service';
 /**
  * Get batches with pagination and filters
  */
-export async function getBatches(req: Request, res: Response) {
+export async function getBatches(req: Request, res: Response): Promise<void> {
     try {
         const page = parseInt(req.query.page as string) || 1;
         const limit = 25;
@@ -15,10 +15,11 @@ export async function getBatches(req: Request, res: Response) {
         const skip = (page - 1) * limit;
 
         if (!userId) {
-            return res.status(400).json({
+            res.status(400).json({
                 success: false,
                 message: 'userId is required',
             });
+            return;
         }
 
         // Build filter
@@ -79,17 +80,18 @@ export async function getBatches(req: Request, res: Response) {
 /**
  * Retry a failed batch
  */
-export async function retryBatch(req: Request, res: Response) {
+export async function retryBatch(req: Request, res: Response): Promise<void> {
     try {
         const { id } = req.params;
 
         const batch = await OdooSyncBatch.findById(id);
 
         if (!batch) {
-            return res.status(404).json({
+            res.status(404).json({
                 success: false,
                 message: 'Batch not found',
             });
+            return;
         }
 
         // Reset batch status to allow retry

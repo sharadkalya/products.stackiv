@@ -1,10 +1,10 @@
-import express from 'express';
+import express, { Router } from 'express';
 
 import { getSyncHistory, getSyncHistoryById } from '@/controllers/admin.controller';
 import { getBatches, retryBatch } from '@/controllers/adminBatch.controller';
 import { adminLogin, verifyAdminToken } from '@/middleware/admin.middleware';
 
-const router = express.Router();
+const router: Router = express.Router();
 
 // Public login endpoint
 router.post('/login', adminLogin);

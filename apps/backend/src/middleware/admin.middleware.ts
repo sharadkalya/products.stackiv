@@ -7,14 +7,15 @@ const ADMIN_PASSWORD = 'Password!';
 /**
  * Middleware to verify admin secret token
  */
-export function verifyAdminToken(req: Request, res: Response, next: NextFunction) {
+export function verifyAdminToken(req: Request, res: Response, next: NextFunction): void {
     const token = req.headers['x-admin-token'] as string;
 
     if (!token || token !== ADMIN_SECRET_TOKEN) {
-        return res.status(401).json({
+        res.status(401).json({
             success: false,
             message: 'Unauthorized: Invalid or missing admin token',
         });
+        return;
     }
 
     next();
@@ -23,18 +24,19 @@ export function verifyAdminToken(req: Request, res: Response, next: NextFunction
 /**
  * Admin login endpoint
  */
-export function adminLogin(req: Request, res: Response) {
+export function adminLogin(req: Request, res: Response): void {
     const { username, password } = req.body;
 
     if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-        return res.status(200).json({
+        res.status(200).json({
             success: true,
             message: 'Login successful',
             token: ADMIN_SECRET_TOKEN,
         });
+        return;
     }
 
-    return res.status(401).json({
+    res.status(401).json({
         success: false,
         message: 'Invalid username or password',
     });
