@@ -10,28 +10,17 @@
         "composite": true,
         "baseUrl": "./",
         "paths": {
-            "@/middleware*": [
-                "src/middleware/*"
-            ],
-            "@/*": [
-                "src/*"
-            ],
-            "shared-types": [
-                "../../packages/shared-types/src"
-            ],
-            "shared-auth": [
-                "../../packages/shared-auth/src"
-            ],
-            "shared-config": [
-                "../../packages/shared-config/src"
-            ],
-            "shared-i18n": [
-                "../../packages/shared-i18n/src"
-            ],
-            "shared-i18n/server": [
-                "../../packages/shared-i18n/src/server.ts"
-            ]
+            "@/middleware*": ["src/middleware/*"],
+            "@/*": ["src/*"],
+            "shared-types": ["../../packages/shared-types/src"],
+            "shared-auth": ["../../packages/shared-auth/src"],
+            "shared-config": ["../../packages/shared-config/src"],
+            "shared-i18n": ["../../packages/shared-i18n/src"],
+            "shared-i18n/server": ["../../packages/shared-i18n/src/server.ts"]
         }
+    },
+    "ts-node": {
+        "files": true
     },
     "references": [
         {
@@ -47,11 +36,6 @@
             "path": "../../packages/shared-i18n"
         }
     ],
-    "include": [
-        "src",
-        "src/types"
-    ],
-    "exclude": [
-        "node_modules"
-    ]
+    "include": ["src", "src/types"],
+    "exclude": ["node_modules"]
 }
