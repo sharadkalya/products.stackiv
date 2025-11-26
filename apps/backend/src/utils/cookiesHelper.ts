@@ -1,10 +1,12 @@
+import type { CookieOptions } from 'express';
+
 const isProd = process.env.NODE_ENV === 'production';
 
-export const commonCookieOptions = {
-    secure: isProd, // true in prod (HTTPS), false in dev
+export const commonCookieOptions: CookieOptions = {
     httpOnly: true,
-    sameSite: 'lax' as const,
+    secure: isProd, // true in prod (HTTPS), false in dev
+    sameSite: isProd ? 'none' : 'lax',
+    domain: isProd ? '.stackiv.com' : undefined, // parent domain in prod, no domain in dev
     path: '/',
-    domain: isProd ? '.stackiv.com' : undefined, // only set in prod
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
 };
