@@ -6,9 +6,9 @@
     "scripts": {
         "dev": "ts-node-dev --respawn --transpile-only --ignore-watch node_modules --require tsconfig-paths/register src/index.ts",
         "build": "tsc -b",
-        "start": "node --max-old-space-size=512 -r ts-node/register -r tsconfig-paths/register src/index.ts",
+        "start": "node -r ./dist/register-paths.js dist/index.js",
         "cron:dev": "ts-node-dev --respawn --transpile-only --ignore-watch node_modules --require tsconfig-paths/register src/cron/odooSyncCron.ts",
-        "cron:start": "node --max-old-space-size=512 -r ts-node/register -r tsconfig-paths/register src/cron/odooSyncCron.ts",
+        "cron:start": "node --max-old-space-size=512 -r ./dist/register-paths.js dist/cron/odooSyncCron.js",
         "test:complete": "npx tsx src/cron/test-scripts/test-complete-sync.js",
         "test:v3": "npx tsx src/cron/test-scripts/test-v3-incremental.js",
         "test:verify": "npx tsx src/cron/test-scripts/test-verify-records.js",

@@ -8,19 +8,12 @@
         "outDir": "./dist",
         "rootDir": "./src",
         "composite": true,
+        "declaration": true,
         "baseUrl": "./",
         "paths": {
             "@/middleware*": ["src/middleware/*"],
-            "@/*": ["src/*"],
-            "shared-types": ["../../packages/shared-types/src"],
-            "shared-auth": ["../../packages/shared-auth/src"],
-            "shared-config": ["../../packages/shared-config/src"],
-            "shared-i18n": ["../../packages/shared-i18n/src"],
-            "shared-i18n/server": ["../../packages/shared-i18n/src/server.ts"]
+            "@/*": ["src/*"]
         }
-    },
-    "ts-node": {
-        "files": true
     },
     "references": [
         {
