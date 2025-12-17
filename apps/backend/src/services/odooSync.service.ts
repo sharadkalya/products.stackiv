@@ -4,7 +4,7 @@ import { OdooSyncBatch, BatchStatus } from '@/models/odooSyncBatch.model';
 import { OdooSyncStatus } from '@/models/odooSyncStatus.model';
 import { ModuleDataWriterService } from '@/services/moduleDataWriter.service';
 import { OdooClientService, OdooConnection } from '@/services/odooClient.service';
-import { addDays, addHours } from '@/utils/time';
+import { addDays, addHours, getDifferenceInHours, getMidpoint } from '@/utils/time';
 
 /**
  * Odoo Sync Service
@@ -96,13 +96,282 @@ export class OdooSyncService {
     }
 
     /**
-     * Process the next batch for a user (v2)
+     * Process the next batch for a user (v3)
+     * - Finds next eligible batch
+     * - Uses adaptive window splitting if needed
+     * - Uses cursor-based pagination
+     * - Implements all-or-nothing batch processing
+     * - Creates next batch if needed
+     */
+    static async processNextBatch(userId: string): Promise<boolean> {
+        try {
+            // Reset any batches that have been in_progress for too long (likely from a crash)
+            const staleThreshold = new Date(Date.now() - 5 * 60 * 1000); // 5 minutes ago
+            await OdooSyncBatch.updateMany(
+                {
+                    userId,
+                    status: 'in_progress',
+                    updatedAt: { $lt: staleThreshold },
+                },
+                {
+                    $set: { status: 'failed' },
+                },
+            );
+
+            // Find next batch to process
+            const batch = await OdooSyncBatch.findOne({
+                userId,
+                status: { $in: ['not_started', 'failed'] as BatchStatus[] },
+                attempts: { $lt: SYNC_CONFIG.MAX_BATCH_ATTEMPTS },
+            })
+                .sort({ startTime: 1 })
+                .limit(1);
+
+            if (!batch) {
+                // No more batches to process, check if sync is complete
+                await this.checkSyncCompletion(userId);
+                return false;
+            }
+
+            console.log(
+                `[OdooSync] Processing batch for user ${userId}, module ${batch.module}, window ${batch.startTime.toISOString()} to ${batch.endTime.toISOString()}`,
+            );
+
+            // Mark batch as in progress (lock)
+            batch.status = 'in_progress';
+            batch.attempts += 1;
+            await batch.save();
+
+            // Get connection details
+            const connectionDetails = await OdooConnectionDetails.findOne({ userId });
+            if (!connectionDetails) {
+                throw new Error('No connection details found');
+            }
+
+            const conn: OdooConnection = {
+                odooUrl: connectionDetails.odooUrl,
+                dbName: connectionDetails.dbName,
+                username: connectionDetails.username,
+                password: connectionDetails.password,
+            };
+
+            // v3: Process window with adaptive splitting
+            await this.processWindowWithAdaptiveSplitting(
+                userId,
+                conn,
+                batch,
+            );
+
+            return true;
+        } catch (error) {
+            console.error(`[OdooSync] Error processing batch for user ${userId}:`, error);
+
+            // v3: All-or-nothing - on error, discard all fetched data
+            // Update batch with error
+            const batch = await OdooSyncBatch.findOne({
+                userId,
+                status: 'in_progress',
+            }).sort({ updatedAt: -1 });
+
+            if (batch) {
+                if (batch.attempts >= SYNC_CONFIG.MAX_BATCH_ATTEMPTS) {
+                    batch.status = 'permanently_failed';
+                } else {
+                    batch.status = 'failed';
+                }
+                batch.lastError = error instanceof Error ? error.message : 'Unknown error';
+                await batch.save();
+
+                // v3: Set hasFailedBatches flag
+                await OdooSyncStatus.findOneAndUpdate(
+                    { userId },
+                    {
+                        hasFailedBatches: true,
+                        lastSyncFailedAt: new Date(),
+                    },
+                );
+            }
+
+            return false;
+        }
+    }
+
+    /**
+     * v3: Process window with adaptive splitting
+     * 
+     * Strategy:
+     * 1. Count records in window
+     * 2. If count > MAX_RECORDS_PER_WINDOW and window > MIN_WINDOW_HOURS, split
+     * 3. Otherwise, fetch with cursor pagination and write
+     */
+    private static async processWindowWithAdaptiveSplitting(
+        userId: string,
+        conn: OdooConnection,
+        batch: any,
+    ): Promise<void> {
+        const windowHours = getDifferenceInHours(batch.startTime, batch.endTime);
+
+        // Count records in this window
+        const count = await OdooClientService.countRecords(
+            conn,
+            batch.module,
+            batch.startTime,
+            batch.endTime,
+        );
+
+        console.log(
+            `[OdooSync] Window has ${count} records (${windowHours.toFixed(1)} hours)`,
+        );
+
+        // Check if we should split
+        const shouldSplit = count > SYNC_CONFIG.MAX_RECORDS_PER_WINDOW &&
+            windowHours > SYNC_CONFIG.MIN_WINDOW_HOURS;
+
+        if (shouldSplit) {
+            console.log(
+                `[OdooSync] Window too dense (${count} records), splitting in half`,
+            );
+
+            // Split window in half
+            const midpoint = getMidpoint(batch.startTime, batch.endTime);
+
+            // Create two sub-batches
+            await OdooSyncBatch.create({
+                userId,
+                module: batch.module,
+                startTime: batch.startTime,
+                endTime: midpoint,
+                status: 'not_started',
+                attempts: 0,
+            });
+
+            await OdooSyncBatch.create({
+                userId,
+                module: batch.module,
+                startTime: midpoint,
+                endTime: batch.endTime,
+                status: 'not_started',
+                attempts: 0,
+            });
+
+            // Mark original batch as done (split)
+            batch.status = 'done';
+            batch.recordCountExpected = 0;
+            await batch.save();
+
+            console.log(
+                `[OdooSync] Created 2 sub-batches for ${MODULE_DISPLAY_NAMES[batch.module]}`,
+            );
+            return;
+        }
+
+        // Process window with cursor pagination
+        if (count > SYNC_CONFIG.MAX_RECORDS_PER_WINDOW) {
+            console.warn(
+                `[OdooSync] Dense burst detected: ${count} records in ${windowHours.toFixed(1)}h window (below MIN_WINDOW). Processing anyway.`,
+            );
+        }
+
+        // v3: Use ID-based pagination (proven reliable for all data patterns)
+        const allRecords = await OdooClientService.fetchAllRecordsForWindowWithCursor(
+            conn,
+            batch.module,
+            batch.startTime,
+            batch.endTime,
+        );
+
+        console.log(
+            `[OdooSync] Fetched ${allRecords.length} records for ${MODULE_DISPLAY_NAMES[batch.module]} using cursor pagination`,
+        );
+
+        // If no records in this window, mark as done and create next batch immediately
+        if (allRecords.length === 0) {
+            batch.status = 'done';
+            batch.recordCountExpected = 0;
+            await batch.save();
+
+            console.log(
+                `[OdooSync] No records in window for ${MODULE_DISPLAY_NAMES[batch.module]}, moving to next window`,
+            );
+
+            // Create next batch if there's more data to sync
+            const now = new Date();
+            if (batch.endTime < now) {
+                const nextStartTime = batch.endTime;
+                const nextEndTime = addHours(nextStartTime, SYNC_CONFIG.WINDOW_HOURS);
+
+                await OdooSyncBatch.create({
+                    userId,
+                    module: batch.module,
+                    startTime: nextStartTime,
+                    endTime: nextEndTime,
+                    status: 'not_started',
+                    attempts: 0,
+                });
+
+                console.log(
+                    `[OdooSync] Created next batch for ${MODULE_DISPLAY_NAMES[batch.module]}`,
+                );
+            } else {
+                // No more batches to create, check if sync is complete
+                await this.checkSyncCompletion(userId);
+            }
+
+            return;
+        }
+
+        // v3: All-or-nothing write
+        // If this fails, we discard all records and mark batch as failed
+        // The upsert strategy ensures no duplicates on retry
+        await ModuleDataWriterService.upsertRecords(userId, batch.module, allRecords);
+
+        console.log(
+            `[OdooSync] Successfully wrote ${allRecords.length} records for ${MODULE_DISPLAY_NAMES[batch.module]}`,
+        );
+
+        // Mark batch as done and update cursor
+        const lastRecord = allRecords[allRecords.length - 1];
+        batch.status = 'done';
+        batch.recordCountExpected = allRecords.length;
+        batch.lastWriteDate = lastRecord.write_date;
+        batch.lastId = lastRecord.id;
+        await batch.save();
+
+        // v3: Update lastCompletedWindowEnd for incremental sync
+        await this.updateLastCompletedWindow(userId, batch.endTime);
+
+        // Create next batch if there's more data to sync
+        const now = new Date();
+        if (batch.endTime < now) {
+            const nextStartTime = batch.endTime;
+            const nextEndTime = addHours(nextStartTime, SYNC_CONFIG.WINDOW_HOURS);
+
+            await OdooSyncBatch.create({
+                userId,
+                module: batch.module,
+                startTime: nextStartTime,
+                endTime: nextEndTime,
+                status: 'not_started',
+                attempts: 0,
+            });
+
+            console.log(
+                `[OdooSync] Created next batch for ${MODULE_DISPLAY_NAMES[batch.module]}`,
+            );
+        } else {
+            // No more batches to create, check if sync is complete
+            await this.checkSyncCompletion(userId);
+        }
+    }
+
+    /**
+     * Process the next batch for a user (v2 - DEPRECATED)
      * - Finds next eligible batch
      * - Uses fetchAllRecordsForWindow with ID-based pagination
      * - Implements all-or-nothing batch processing
      * - Creates next batch if needed
      */
-    static async processNextBatch(userId: string): Promise<boolean> {
+    static async processNextBatchV2(userId: string): Promise<boolean> {
         try {
             // Reset any batches that have been in_progress for too long (likely from a crash)
             const staleThreshold = new Date(Date.now() - 5 * 60 * 1000); // 5 minutes ago

@@ -14,6 +14,9 @@ export interface IOdooSyncBatch extends Document {
     recordCountExpected?: number;
     lastError?: string;
     lastProcessedId?: number;
+    // v3: Cursor-based pagination fields
+    lastWriteDate?: string;  // Format: 'YYYY-MM-DD HH:mm:ss' (UTC)
+    lastId?: number;         // Last processed Odoo record ID
     createdAt: Date;
     updatedAt: Date;
 }
@@ -59,6 +62,13 @@ const OdooSyncBatchSchema: Schema = new Schema(
             type: String,
         },
         lastProcessedId: {
+            type: Number,
+        },
+        // v3: Cursor-based pagination fields
+        lastWriteDate: {
+            type: String,  // 'YYYY-MM-DD HH:mm:ss' format
+        },
+        lastId: {
             type: Number,
         },
     },

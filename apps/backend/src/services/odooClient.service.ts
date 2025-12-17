@@ -115,8 +115,8 @@ export class OdooClientService {
         return new Promise((resolve, reject) => {
             const domain = [
                 '&',
-                ['write_date', '>=', formatForOdoo(startTime)],
-                ['write_date', '<', formatForOdoo(endTime)],
+                ['write_date', '>', formatForOdoo(startTime)],
+                ['write_date', '<=', formatForOdoo(endTime)],
             ];
 
             this.authenticateAndExecute(
@@ -182,6 +182,113 @@ export class OdooClientService {
     }
 
     /**
+     * v3: Fetch ALL records for a window using ID-based pagination
+     * 
+     * PROVEN APPROACH: Simple id > lastId cursor with 'id asc' ordering
+     * - Handles timestamp bursts (100+ records with same write_date)
+     * - Zero duplicates, no data loss
+     * - Works for CSV imports and normal data
+     * 
+     * @param conn - Odoo connection
+     * @param module - Odoo module to query
+     * @param startTime - Window start time (can include buffer)
+     * @param endTime - Window end time
+     * @returns All records in the window
+     * 
+     * Features:
+     * - ID-based pagination: id > lastId
+     * - Ordered by 'id asc' for deterministic results
+     * - Loops until no more records
+     * - Respects API_CALL_DELAY_MS between calls
+     * - No deduplication needed (proven by tests)
+     */
+    static async fetchAllRecordsForWindowWithCursor(
+        conn: OdooConnection,
+        module: SupportedModule,
+        startTime: Date,
+        endTime: Date,
+    ): Promise<any[]> {
+        const allRows: any[] = [];
+        let lastId = 0;
+        const limit = SYNC_CONFIG.LIMIT_PER_CALL;
+
+        // Fetch module-specific fields
+        const fields: string[] = MODULE_FIELDS[module] || [
+            'id',
+            'display_name',
+            'name',
+            'create_date',
+            'write_date',
+        ];
+
+        const startTimeStr = formatForOdoo(startTime);
+        const endTimeStr = formatForOdoo(endTime);
+
+        let iterationCount = 0;
+        const MAX_ITERATIONS = 10000; // Safety limit
+
+        while (true) {
+            iterationCount++;
+
+            if (iterationCount > MAX_ITERATIONS) {
+                console.error(`[OdooClient] Hit max iterations (${MAX_ITERATIONS}), breaking to prevent infinite loop`);
+                console.error(`[OdooClient] Last ID: ${lastId}`);
+                console.error(`[OdooClient] Total fetched: ${allRows.length}`);
+                break;
+            }
+
+            // Build simple domain: write_date range AND id > lastId
+            const domain = [
+                '&',
+                '&',
+                ['write_date', '>', startTimeStr],
+                ['write_date', '<=', endTimeStr],
+                ['id', '>', lastId],
+            ];
+
+            if (iterationCount <= 3 || iterationCount % 100 === 0) {
+                console.log(`[OdooClient] Page ${iterationCount}: id > ${lastId}, fetched ${allRows.length} total`);
+            }
+
+            const rows = await new Promise<any[]>((resolve, reject) => {
+                this.authenticateAndExecute(
+                    conn,
+                    module,
+                    'search_read',
+                    [domain, fields],
+                    { limit, order: 'id asc' }, // CRITICAL: Order by ID ascending
+                    (error: any, records: any) => {
+                        if (error) {
+                            reject(new Error(`Failed to fetch records: ${error.message}`));
+                            return;
+                        }
+                        resolve(records as any[]);
+                    },
+                );
+            });
+
+            // No more records, we're done
+            if (rows.length === 0) {
+                break;
+            }
+
+            // Accumulate records
+            allRows.push(...rows);
+
+            // Update cursor to last ID in this batch
+            lastId = Math.max(...rows.map((row: any) => row.id));
+
+            // Respect API rate limiting
+            if (SYNC_CONFIG.API_CALL_DELAY_MS > 0) {
+                await new Promise((resolve) => setTimeout(resolve, SYNC_CONFIG.API_CALL_DELAY_MS));
+            }
+        }
+
+        console.log(`[OdooClient] Completed: ${allRows.length} records fetched in ${iterationCount} pages`);
+        return allRows;
+    }
+
+    /**
      * v2: Fetch ALL records for a fixed time window using ID-based pagination
      * This is the canonical implementation per v2 spec section 5
      * 
@@ -219,8 +326,8 @@ export class OdooClientService {
             const domain = [
                 '&',
                 '&',
-                ['write_date', '>=', formatForOdoo(startTime)],
-                ['write_date', '<', formatForOdoo(endTime)],
+                ['write_date', '>', formatForOdoo(startTime)],
+                ['write_date', '<=', formatForOdoo(endTime)],
                 ['id', '>', lastId],
             ];
 

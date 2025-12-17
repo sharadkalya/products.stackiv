@@ -8,7 +8,7 @@
 export const SYNC_CONFIG = {
     /**
      * Maximum number of records to fetch in a single Odoo API call
-     * v2: Used for ID-based pagination limit
+     * v3: Used for cursor-based pagination limit
      */
     LIMIT_PER_CALL: 200,
 
@@ -19,16 +19,47 @@ export const SYNC_CONFIG = {
 
     /**
      * Number of days to look back for the initial sync
-     * E.g., 90 means sync data from the last 90 days
-     * Set to 3 for testing purposes
+     * E.g., 14 means sync data from the last 14 days
      */
-    INITIAL_SYNC_RANGE_DAYS: 3,
+    INITIAL_SYNC_RANGE_DAYS: 14,
 
     /**
-     * Fixed time window size in hours for each batch
-     * v2: Windows are now fixed and never shrink or adapt
+     * Safety buffer in minutes for incremental syncs
+     * Subtracts this from last sync time to catch edge cases
+     * Handles clock skew, transaction timing, and boundary conditions
+     */
+    SYNC_BUFFER_MINUTES: 10,
+
+    /**
+     * Initial time window size in hours for each batch
+     * v3: Windows adapt based on density (can split smaller)
      */
     WINDOW_HOURS: 24,
+
+    /**
+     * Minimum window size in hours when adaptive splitting
+     * If a window reaches this size and still has too many records, process anyway
+     */
+    MIN_WINDOW_HOURS: 1,
+
+    /**
+     * Maximum records per window before triggering adaptive split
+     * If a window contains more than this, split it in half
+     */
+    MAX_RECORDS_PER_WINDOW: 5000,
+
+    /**
+     * Chunk size for bulk upsert operations
+     * Large batches are split into chunks to avoid MongoDB limits
+     */
+    BULK_UPSERT_CHUNK_SIZE: 2000,
+
+    /**
+     * Sort order for ID-based pagination
+     * CRITICAL: Must be 'id asc' for reliable pagination
+     * Works for both normal data and timestamp bursts (CSV imports)
+     */
+    SORT_ORDER: 'id asc',
 
     /**
      * Delay between API calls in milliseconds to avoid rate limiting
