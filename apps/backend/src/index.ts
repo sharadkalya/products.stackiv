@@ -31,7 +31,7 @@ app.use(
         origin: frontendUrl,
         credentials: true,
         exposedHeaders: ['Authorization'],
-    }),
+    },
 );
 app.options(/.*/, cors({
     origin: frontendUrl,
@@ -39,6 +39,12 @@ app.options(/.*/, cors({
     exposedHeaders: ['Authorization'],
 }));
 app.use(express.json());
+
+// Health check endpoint for monitoring
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 app.use('/api', routes);
 
 const PORT = process.env.PORT ?? 5001;

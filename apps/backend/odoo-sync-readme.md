@@ -82,10 +82,21 @@ API_CALL_DELAY_MS: 1000,
 CRON_SCHEDULE: "_/10 _ \* \* \* \*", // every 10 sec
 
 SUPPORTED_MODULES: [
-"sale.order",
-"account.move",
+"res.company",
 "res.partner",
-"hr.employee"
+"res.users",
+"hr.employee",
+"product.product",
+"product.category",
+"crm.lead",
+"sale.order",
+"sale.order.line",
+"account.move",
+"account.move.line",
+"purchase.order",
+"purchase.order.line",
+"account.journal",
+"account.account"
 ] as const,
 };
 

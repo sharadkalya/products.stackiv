@@ -1,9 +1,10 @@
 {
     "private": true,
     "scripts": {
-        "dev": "concurrently -k -n hosts,backend -c blue,green \"yarn workspace hosts dev\" \"yarn workspace backend dev\"",
+        "dev": "concurrently -k -n hosts,backend,cron -c blue,green,yellow \"yarn workspace hosts dev\" \"yarn workspace backend dev\" \"yarn workspace backend cron:dev\"",
         "build": "tsc -b",
-        "start": "yarn workspace backend start"
+        "start": "yarn workspace backend start",
+        "start:cron": "yarn workspace backend cron:start"
     },
     "workspaces": [
         "apps/*",

@@ -19,9 +19,9 @@ export const SYNC_CONFIG = {
 
     /**
      * Number of days to look back for the initial sync
-     * E.g., 14 means sync data from the last 14 days
+     * E.g., 90 means sync data from the last 90 days
      */
-    INITIAL_SYNC_RANGE_DAYS: 14,
+    INITIAL_SYNC_RANGE_DAYS: 90,
 
     /**
      * Safety buffer in minutes for incremental syncs
@@ -86,11 +86,21 @@ export const SYNC_CONFIG = {
      * Only these modules will be synced from Odoo
      */
     SUPPORTED_MODULES: [
-        'sale.order',      // Sales Orders
-        'sale.order.line', // Sales Order Lines
-        'account.move',    // Invoices
-        'res.partner',     // Contacts/Partners
-        'hr.employee',     // Employees
+        'res.company',          // Companies
+        'res.partner',          // Contacts/Partners
+        'res.users',            // Users
+        'hr.employee',          // Employees
+        'product.product',      // Products
+        'product.category',     // Product Categories
+        'crm.lead',             // CRM Leads/Opportunities
+        'sale.order',           // Sales Orders
+        'sale.order.line',      // Sales Order Lines
+        'account.move',         // Invoices
+        'account.move.line',    // Invoice Lines
+        'purchase.order',       // Purchase Orders
+        'purchase.order.line',  // Purchase Order Lines
+        'account.journal',      // Journals
+        'account.account',      // Chart of Accounts
     ] as const,
 
     /**
@@ -125,20 +135,40 @@ export type SupportedModule = (typeof SYNC_CONFIG.SUPPORTED_MODULES)[number];
  * Module display names for logging and UI
  */
 export const MODULE_DISPLAY_NAMES: Record<SupportedModule, string> = {
+    'res.company': 'Companies',
+    'res.partner': 'Contacts',
+    'res.users': 'Users',
+    'hr.employee': 'Employees',
+    'product.product': 'Products',
+    'product.category': 'Product Categories',
+    'crm.lead': 'CRM Leads',
     'sale.order': 'Sales Orders',
     'sale.order.line': 'Sales Order Lines',
     'account.move': 'Invoices',
-    'res.partner': 'Contacts',
-    'hr.employee': 'Employees',
+    'account.move.line': 'Invoice Lines',
+    'purchase.order': 'Purchase Orders',
+    'purchase.order.line': 'Purchase Order Lines',
+    'account.journal': 'Journals',
+    'account.account': 'Accounts',
 };
 
 /**
  * Mapping of Odoo module names to MongoDB collection names
  */
 export const MODULE_TO_COLLECTION: Record<SupportedModule, string> = {
+    'res.company': 'odoocompanies',
+    'res.partner': 'odoocontacts',
+    'res.users': 'odoousers',
+    'hr.employee': 'odooemployees',
+    'product.product': 'odooproducts',
+    'product.category': 'odooproductcategories',
+    'crm.lead': 'odooleads',
     'sale.order': 'odoosaleorders',
     'sale.order.line': 'odoosaleorderlines',
     'account.move': 'odooinvoices',
-    'res.partner': 'odoocontacts',
-    'hr.employee': 'odooemployees',
+    'account.move.line': 'odooinvoicelines',
+    'purchase.order': 'odoopurchaseorders',
+    'purchase.order.line': 'odoopurchaseorderlines',
+    'account.journal': 'odoojournals',
+    'account.account': 'odooaccounts',
 };

@@ -70,7 +70,7 @@ npx tsx src/cron/test-scripts/clear-data.js
 ```
 
 This will:
-- Delete all documents from Odoo collections (sale orders, invoices, contacts, employees)
+- Delete all documents from all 15 Odoo module collections
 - Clear all sync batches
 - Reset sync statuses to idle
 

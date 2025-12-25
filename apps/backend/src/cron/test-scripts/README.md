@@ -95,7 +95,7 @@ This directory contains comprehensive test scripts to validate the Odoo Sync Eng
 **What it does:**
 
 -   Processes ALL batches for ALL modules until complete
--   Handles all 4 modules: Sales Orders, Invoices, Contacts, Employees
+-   Handles all 15 modules: Companies, Contacts, Users, Employees, Products, Product Categories, CRM Leads, Sales Orders, Sale Order Lines, Invoices, Invoice Lines, Purchase Orders, Purchase Order Lines, Journals, Accounts
 -   Provides real-time progress updates
 -   **Connects to Odoo to verify synced counts match source counts**
 -   Comprehensive data quality checks
@@ -141,7 +141,7 @@ node test-odoo-records.js
 **Expected Output:**
 
 -   Authentication success
--   Record counts for all 4 modules
+-   Record counts for all 15 modules
 -   Sample records with IDs, names, and timestamps
 -   Warnings if no data found
 

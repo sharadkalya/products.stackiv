@@ -1,0 +1,41 @@
+services:
+    # Backend API Service
+    - type: web
+      name: stayinn-backend
+      runtime: node
+      env: node
+      region: oregon
+      plan: starter
+      buildCommand: yarn install && yarn build
+      startCommand: yarn start
+      envVars:
+          - key: NODE_ENV
+            value: production
+          - key: MONGODB_URI
+            sync: false
+          - key: FIREBASE_ADMIN_SDK
+            sync: false
+          - key: JWT_SECRET
+            sync: false
+          - key: OPENAI_API_KEY
+            sync: false
+          - key: PINECONE_API_KEY
+            sync: false
+          - key: FRONTEND_URL
+            sync: false
+      healthCheckPath: /health
+
+    # Cron Job Service (Background Worker)
+    - type: worker
+      name: stayinn-odoo-sync-cron
+      runtime: node
+      env: node
+      region: oregon
+      plan: starter
+      buildCommand: yarn install && yarn build
+      startCommand: yarn cron:start
+      envVars:
+          - key: NODE_ENV
+            value: production
+          - key: MONGODB_URI
+            sync: false

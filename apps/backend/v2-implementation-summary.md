@@ -181,7 +181,7 @@ The implementation is ready for:
 1. **CSV Burst Test**: Import 1000+ records with identical write_date
 2. **Retry Test**: Kill process mid-batch, verify clean retry
 3. **Deduplication Test**: Reprocess same batch multiple times
-4. **Completion Test**: Full 90-day sync across all 4 modules
+4. **Completion Test**: Full 90-day sync across all 15 modules
 
 ## Migration Notes
 
@@ -228,7 +228,7 @@ The implementation is ready for:
 1. **Monitor Initial Sync**
 
     - Watch for any errors in pagination logic
-    - Verify all 4 modules sync successfully
+    - Verify all 15 modules sync successfully
     - Check record counts match Odoo
 
 2. **Test CSV Import Scenario**

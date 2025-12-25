@@ -9,10 +9,11 @@
         "start": "node -r ./dist/register-paths.js dist/index.js",
         "cron:dev": "ts-node-dev --respawn --transpile-only --ignore-watch node_modules --require tsconfig-paths/register src/cron/odooSyncCron.ts",
         "cron:start": "node --max-old-space-size=512 -r ./dist/register-paths.js dist/cron/odooSyncCron.js",
-        "test:complete": "npx tsx src/cron/test-scripts/test-complete-sync.js",
-        "test:v3": "npx tsx src/cron/test-scripts/test-v3-incremental.js",
-        "test:verify": "npx tsx src/cron/test-scripts/test-verify-records.js",
+        "test:sync": "npx tsx src/cron/test-scripts/full-90day-sync.js",
+        "test:verify": "npx tsx src/cron/test-scripts/verify-sync.js",
         "test:clear": "npx tsx src/cron/test-scripts/clear-data.js",
+        "test:collections": "npx tsx src/cron/test-scripts/check-collections.js",
+        "test:duplicates": "npx tsx src/cron/test-scripts/check-duplicates.js",
         "test:manual": "npx tsx src/cron/test-scripts/manual-process.js"
     },
     "dependencies": {

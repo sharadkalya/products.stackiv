@@ -7,7 +7,24 @@ async function clearData() {
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('✓ Connected to MongoDB');
 
-    const collections = ['odoosaleorders', 'odoosaleorderlines', 'odooinvoices', 'odoocontacts', 'odooemployees'];
+    const collections = [
+        'odoocompanies',
+        'odoocontacts',
+        'odoousers',
+        'odooemployees',
+        'odooproducts',
+        'odooproductcategories',
+        'odooleads',
+        'odoosaleorders',
+        'odoosaleorderlines',
+        'odooinvoices',
+        'odooinvoicelines',
+        'odoopurchaseorders',
+        'odoopurchaseorderlines',
+        'odoojournals',
+        'odooaccounts'
+    ];
+
     for (const col of collections) {
         const result = await mongoose.connection.db.collection(col).deleteMany({});
         console.log(`✓ Cleared ${col}: ${result.deletedCount} docs`);
