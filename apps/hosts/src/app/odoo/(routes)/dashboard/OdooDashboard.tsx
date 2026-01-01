@@ -35,14 +35,15 @@ export function OdooDashboard() {
 
                 // Step 2: Based on syncStatus, call appropriate endpoint
                 if (currentSyncStatus === 'not_started') {
-                    // Call /init
+                    // Call /init to trigger sync
                     const initResponse = await initOdooDashboard();
                     setActionMessage(initResponse.message);
-                } else if (currentSyncStatus === 'done' || currentSyncStatus === 'pending') {
-                    // Call /dashboard
+                } else if (currentSyncStatus === 'done') {
+                    // Only call /dashboard when sync is complete
                     const dashboardResponse = await getOdooDashboard();
                     setActionMessage(dashboardResponse.message);
                 }
+                // For 'pending', 'in_progress', 'failed' - just display status, don't call /dashboard
             } catch (err) {
                 console.error('Error loading dashboard:', err);
                 setError('Failed to load dashboard. Please try again.');

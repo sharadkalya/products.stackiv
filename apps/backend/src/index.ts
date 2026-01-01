@@ -31,7 +31,7 @@ app.use(
         origin: frontendUrl,
         credentials: true,
         exposedHeaders: ['Authorization'],
-    },
+    }),
 );
 app.options(/.*/, cors({
     origin: frontendUrl,

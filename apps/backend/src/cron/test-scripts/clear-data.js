@@ -35,8 +35,22 @@ async function clearData() {
     if (status) {
         await mongoose.connection.db.collection('odoosyncbatches').deleteMany({});
         console.log('✓ Cleared all sync batches');
-        await mongoose.connection.db.collection('odoosyncstatuses').updateMany({}, { $set: { status: 'idle', currentBatchId: null } });
-        console.log('✓ Reset sync statuses to idle');
+        await mongoose.connection.db.collection('odoosyncstatuses').updateMany(
+            {},
+            {
+                $set: {
+                    syncStatus: 'not_started',
+                    initialSyncDone: false,
+                    hasFailedBatches: false,
+                    lastCompletedWindowEnd: null
+                },
+                $unset: {
+                    status: '',
+                    currentBatchId: ''
+                }
+            }
+        );
+        console.log('✓ Reset sync statuses to not_started');
     }
 
     await mongoose.disconnect();
