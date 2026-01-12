@@ -1,4 +1,4 @@
-import { SYNC_CONFIG, MODULE_DISPLAY_NAMES } from '@/config/sync.config';
+import { SYNC_CONFIG, MODULE_DISPLAY_NAMES, SupportedModule } from '@/config/sync.config';
 import { OdooConnectionDetails } from '@/models/odoo.model';
 import { OdooSyncBatch, BatchStatus } from '@/models/odooSyncBatch.model';
 import { OdooSyncStatus } from '@/models/odooSyncStatus.model';
@@ -260,7 +260,7 @@ export class OdooSyncService {
             await batch.save();
 
             console.log(
-                `[OdooSync] Created 2 sub-batches for ${MODULE_DISPLAY_NAMES[batch.module]}`,
+                `[OdooSync] Created 2 sub-batches for ${MODULE_DISPLAY_NAMES[batch.module as SupportedModule]}`,
             );
             return;
         }
@@ -281,7 +281,7 @@ export class OdooSyncService {
         );
 
         console.log(
-            `[OdooSync] Fetched ${allRecords.length} records for ${MODULE_DISPLAY_NAMES[batch.module]} using cursor pagination`,
+            `[OdooSync] Fetched ${allRecords.length} records for ${MODULE_DISPLAY_NAMES[batch.module as SupportedModule]} using cursor pagination`,
         );
 
         // If no records in this window, mark as done and create next batch immediately
@@ -291,7 +291,7 @@ export class OdooSyncService {
             await batch.save();
 
             console.log(
-                `[OdooSync] No records in window for ${MODULE_DISPLAY_NAMES[batch.module]}, moving to next window`,
+                `[OdooSync] No records in window for ${MODULE_DISPLAY_NAMES[batch.module as SupportedModule]}, moving to next window`,
             );
 
             // Create next batch if there's more data to sync
@@ -310,7 +310,7 @@ export class OdooSyncService {
                 });
 
                 console.log(
-                    `[OdooSync] Created next batch for ${MODULE_DISPLAY_NAMES[batch.module]}`,
+                    `[OdooSync] Created next batch for ${MODULE_DISPLAY_NAMES[batch.module as SupportedModule]}`,
                 );
             } else {
                 // No more batches to create, check if sync is complete
@@ -326,7 +326,7 @@ export class OdooSyncService {
         await ModuleDataWriterService.upsertRecords(userId, batch.module, allRecords);
 
         console.log(
-            `[OdooSync] Successfully wrote ${allRecords.length} records for ${MODULE_DISPLAY_NAMES[batch.module]}`,
+            `[OdooSync] Successfully wrote ${allRecords.length} records for ${MODULE_DISPLAY_NAMES[batch.module as SupportedModule]}`,
         );
 
         // Mark batch as done and update cursor
@@ -356,7 +356,7 @@ export class OdooSyncService {
             });
 
             console.log(
-                `[OdooSync] Created next batch for ${MODULE_DISPLAY_NAMES[batch.module]}`,
+                `[OdooSync] Created next batch for ${MODULE_DISPLAY_NAMES[batch.module as SupportedModule]}`,
             );
         } else {
             // No more batches to create, check if sync is complete
@@ -433,7 +433,7 @@ export class OdooSyncService {
             );
 
             console.log(
-                `[OdooSync] Fetched ${allRecords.length} records for ${MODULE_DISPLAY_NAMES[batch.module]} using ID-based pagination`,
+                `[OdooSync] Fetched ${allRecords.length} records for ${MODULE_DISPLAY_NAMES[batch.module as SupportedModule]} using ID-based pagination`,
             );
 
             // If no records in this window, mark as done and create next batch immediately
@@ -443,7 +443,7 @@ export class OdooSyncService {
                 await batch.save();
 
                 console.log(
-                    `[OdooSync] No records in window for ${MODULE_DISPLAY_NAMES[batch.module]}, moving to next window`,
+                    `[OdooSync] No records in window for ${MODULE_DISPLAY_NAMES[batch.module as SupportedModule]}, moving to next window`,
                 );
 
                 // Create next batch if there's more data to sync
@@ -462,7 +462,7 @@ export class OdooSyncService {
                     });
 
                     console.log(
-                        `[OdooSync] Created next batch for ${MODULE_DISPLAY_NAMES[batch.module]}`,
+                        `[OdooSync] Created next batch for ${MODULE_DISPLAY_NAMES[batch.module as SupportedModule]}`,
                     );
                 } else {
                     // No more batches to create, check if sync is complete
@@ -478,7 +478,7 @@ export class OdooSyncService {
             await ModuleDataWriterService.upsertRecords(userId, batch.module, allRecords);
 
             console.log(
-                `[OdooSync] Successfully wrote ${allRecords.length} records for ${MODULE_DISPLAY_NAMES[batch.module]}`,
+                `[OdooSync] Successfully wrote ${allRecords.length} records for ${MODULE_DISPLAY_NAMES[batch.module as SupportedModule]}`,
             );
 
             // Mark batch as done
@@ -505,7 +505,7 @@ export class OdooSyncService {
                 });
 
                 console.log(
-                    `[OdooSync] Created next batch for ${MODULE_DISPLAY_NAMES[batch.module]}`,
+                    `[OdooSync] Created next batch for ${MODULE_DISPLAY_NAMES[batch.module as SupportedModule]}`,
                 );
             } else {
                 // No more batches to create, check if sync is complete
