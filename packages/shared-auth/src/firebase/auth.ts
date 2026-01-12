@@ -1,6 +1,7 @@
 import {
     createUserWithEmailAndPassword,
     sendEmailVerification,
+    sendPasswordResetEmail,
     signInWithEmailAndPassword,
     signOut,
     GoogleAuthProvider,
@@ -130,6 +131,92 @@ export async function signInViaGoogle(): Promise<ISignupResult> {
         return {
             success: false,
             message: error.message ?? 'couldntLoginUser',
+        };
+    }
+}
+
+/**
+ * Resends email verification to a user
+ * User must be signed in to resend verification email
+ *
+ * @param {IEmailAuthPayload} payload - email and password
+ * @returns {Promise<ISignupResult>}
+ */
+export async function resendVerificationEmail(payload: IEmailAuthPayload): Promise<ISignupResult> {
+    try {
+        const { email, password } = payload;
+
+        // Sign in user first
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        if (user.emailVerified) {
+            return {
+                success: true,
+                emailVerified: true,
+                message: 'emailAlreadyVerified',
+            };
+        }
+
+        // Send verification email
+        await sendEmailVerification(user);
+
+        return {
+            success: true,
+            emailVerified: false,
+            message: 'verificationEmailResent',
+        };
+    } catch (error: any) {
+        console.error('Error in resendVerificationEmail:', error);
+
+        if (error?.message?.includes('invalid-credential')) {
+            return {
+                success: false,
+                message: 'invalidCredentials',
+            };
+        }
+
+        return {
+            success: false,
+            message: error.message ?? 'couldntResendEmail',
+        };
+    }
+}
+
+/**
+ * Sends a password reset email to the user
+ *
+ * @param {string} email - User's email address
+ * @returns {Promise<ISignupResult>}
+ */
+export async function sendPasswordReset(email: string): Promise<ISignupResult> {
+    try {
+        await sendPasswordResetEmail(auth, email);
+
+        return {
+            success: true,
+            message: 'passwordResetEmailSent',
+        };
+    } catch (error: any) {
+        console.error('Error in sendPasswordReset:', error);
+
+        if (error?.message?.includes('user-not-found')) {
+            return {
+                success: false,
+                message: 'userNotFound',
+            };
+        }
+
+        if (error?.message?.includes('invalid-email')) {
+            return {
+                success: false,
+                message: 'invalidEmailError',
+            };
+        }
+
+        return {
+            success: false,
+            message: error.message ?? 'couldntSendResetEmail',
         };
     }
 }

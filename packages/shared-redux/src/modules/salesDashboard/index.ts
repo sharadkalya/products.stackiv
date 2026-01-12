@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import axios from 'axios';
 import type {
     CombinedDashboardData,
     SalesKPIs,
@@ -12,6 +13,9 @@ import type {
 } from 'shared-types';
 
 import type { RootState } from '../../store';
+
+// API base URL configuration
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '/api';
 
 // Re-export types for backward compatibility
 export type {
@@ -49,21 +53,17 @@ export const fetchSalesDashboard = createAsyncThunk(
             if (to) params.append('to', to);
 
             const queryString = params.toString();
-            const url = `/api/odoo/dashboard${queryString ? `?${queryString}` : ''}`;
+            const url = `${API_BASE_URL}/odoo/dashboard${queryString ? `?${queryString}` : ''}`;
 
-            const response = await fetch(url, {
-                credentials: 'include',
+            const response = await axios.get(url, {
+                withCredentials: true,
             });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                return rejectWithValue(errorData.message || 'Failed to fetch dashboard data');
-            }
-
-            const result = await response.json();
-            return result.data as CombinedDashboardData;
-        } catch (error) {
-            return rejectWithValue(error instanceof Error ? error.message : 'Network error');
+            return response.data.data as CombinedDashboardData;
+        } catch (error: any) {
+            return rejectWithValue(
+                error.response?.data?.message || error.message || 'Failed to fetch dashboard data',
+            );
         }
     },
 );
