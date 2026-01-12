@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { OdooConnectionSchema } from 'shared-types';
+import { CombinedDashboardData, OdooConnectionSchema } from 'shared-types';
 
 import {
     getOdooConnectionByUserId,
@@ -11,6 +11,8 @@ import {
     upsertOdooSyncStatus,
 } from '@/services/odoo.service';
 import { OdooSyncService } from '@/services/odooSync.service';
+import { SalesDashboardService } from '@/services/salesDashboard.service';
+import { InvoiceDashboardService } from '@/services/invoices/invoiceDashboard.service';
 import { formatZodError } from '@/utils/formatError';
 import { badRequest, internalError } from '@/utils/response';
 
@@ -106,10 +108,49 @@ export const getDashboard = async (req: Request, res: Response) => {
             return;
         }
 
-        // Sync is complete, return success
+        // Parse and validate date filters (optional)
+        const from = req.query.from ? new Date(req.query.from as string) : undefined;
+        const to = req.query.to ? new Date(req.query.to as string) : undefined;
+
+        // Validate dates if provided
+        if (from && isNaN(from.getTime())) {
+            badRequest(res, 'Invalid from date');
+            return;
+        }
+
+        if (to && isNaN(to.getTime())) {
+            badRequest(res, 'Invalid to date');
+            return;
+        }
+
+        if (from && to && from > to) {
+            badRequest(res, 'from date must be before to date');
+            return;
+        }
+
+        // Get sales and invoice dashboard data in parallel
+        const [salesData, invoicesData] = await Promise.all([
+            SalesDashboardService.getSalesDashboard(userId, from, to),
+            InvoiceDashboardService.getInvoiceDashboard(
+                userId,
+                from || new Date(to ? to.getTime() - 30 * 24 * 60 * 60 * 1000 : Date.now() - 30 * 24 * 60 * 60 * 1000),
+                to || new Date()
+            ),
+        ]);
+
+        // Combine into single response
+        const combinedData: CombinedDashboardData = {
+            meta: salesData.meta,
+            sales: {
+                kpis: salesData.kpis,
+                charts: salesData.charts,
+            },
+            invoices: invoicesData,
+        };
+
         res.status(200).json({
             success: true,
-            message: 'Dashboard data is ready',
+            data: combinedData,
         });
     } catch (error) {
         console.error('Error in getDashboard:', error);

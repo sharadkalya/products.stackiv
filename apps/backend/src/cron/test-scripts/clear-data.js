@@ -7,7 +7,24 @@ async function clearData() {
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('✓ Connected to MongoDB');
 
-    const collections = ['odoosaleorders', 'odooinvoices', 'odoocontacts', 'odooemployees'];
+    const collections = [
+        'odoocompanies',
+        'odoocontacts',
+        'odoousers',
+        'odooemployees',
+        'odooproducts',
+        'odooproductcategories',
+        'odooleads',
+        'odoosaleorders',
+        'odoosaleorderlines',
+        'odooinvoices',
+        'odooinvoicelines',
+        'odoopurchaseorders',
+        'odoopurchaseorderlines',
+        'odoojournals',
+        'odooaccounts'
+    ];
+
     for (const col of collections) {
         const result = await mongoose.connection.db.collection(col).deleteMany({});
         console.log(`✓ Cleared ${col}: ${result.deletedCount} docs`);
@@ -18,8 +35,22 @@ async function clearData() {
     if (status) {
         await mongoose.connection.db.collection('odoosyncbatches').deleteMany({});
         console.log('✓ Cleared all sync batches');
-        await mongoose.connection.db.collection('odoosyncstatuses').updateMany({}, { $set: { status: 'idle', currentBatchId: null } });
-        console.log('✓ Reset sync statuses to idle');
+        await mongoose.connection.db.collection('odoosyncstatuses').updateMany(
+            {},
+            {
+                $set: {
+                    syncStatus: 'not_started',
+                    initialSyncDone: false,
+                    hasFailedBatches: false,
+                    lastCompletedWindowEnd: null
+                },
+                $unset: {
+                    status: '',
+                    currentBatchId: ''
+                }
+            }
+        );
+        console.log('✓ Reset sync statuses to not_started');
     }
 
     await mongoose.disconnect();

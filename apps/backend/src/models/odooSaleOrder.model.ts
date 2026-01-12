@@ -79,6 +79,10 @@ const OdooSaleOrderSchema: Schema = new Schema(
 // Unique index to prevent duplicates
 OdooSaleOrderSchema.index({ userId: 1, odooId: 1 }, { unique: true });
 
+// Performance indexes for dashboard queries
+OdooSaleOrderSchema.index({ userId: 1, state: 1, dateOrder: 1 });
+OdooSaleOrderSchema.index({ userId: 1, state: 1, partnerId: 1, dateOrder: 1 });
+
 export const OdooSaleOrder = mongoose.model<IOdooSaleOrder>(
     'OdooSaleOrder',
     OdooSaleOrderSchema,

@@ -8,7 +8,7 @@
 export const SYNC_CONFIG = {
     /**
      * Maximum number of records to fetch in a single Odoo API call
-     * v2: Used for ID-based pagination limit
+     * v3: Used for cursor-based pagination limit
      */
     LIMIT_PER_CALL: 200,
 
@@ -20,15 +20,46 @@ export const SYNC_CONFIG = {
     /**
      * Number of days to look back for the initial sync
      * E.g., 90 means sync data from the last 90 days
-     * Set to 3 for testing purposes
      */
-    INITIAL_SYNC_RANGE_DAYS: 3,
+    INITIAL_SYNC_RANGE_DAYS: 90,
 
     /**
-     * Fixed time window size in hours for each batch
-     * v2: Windows are now fixed and never shrink or adapt
+     * Safety buffer in minutes for incremental syncs
+     * Subtracts this from last sync time to catch edge cases
+     * Handles clock skew, transaction timing, and boundary conditions
+     */
+    SYNC_BUFFER_MINUTES: 10,
+
+    /**
+     * Initial time window size in hours for each batch
+     * v3: Windows adapt based on density (can split smaller)
      */
     WINDOW_HOURS: 24,
+
+    /**
+     * Minimum window size in hours when adaptive splitting
+     * If a window reaches this size and still has too many records, process anyway
+     */
+    MIN_WINDOW_HOURS: 1,
+
+    /**
+     * Maximum records per window before triggering adaptive split
+     * If a window contains more than this, split it in half
+     */
+    MAX_RECORDS_PER_WINDOW: 5000,
+
+    /**
+     * Chunk size for bulk upsert operations
+     * Large batches are split into chunks to avoid MongoDB limits
+     */
+    BULK_UPSERT_CHUNK_SIZE: 2000,
+
+    /**
+     * Sort order for ID-based pagination
+     * CRITICAL: Must be 'id asc' for reliable pagination
+     * Works for both normal data and timestamp bursts (CSV imports)
+     */
+    SORT_ORDER: 'id asc',
 
     /**
      * Delay between API calls in milliseconds to avoid rate limiting
@@ -55,10 +86,21 @@ export const SYNC_CONFIG = {
      * Only these modules will be synced from Odoo
      */
     SUPPORTED_MODULES: [
-        'sale.order',      // Sales Orders
-        'account.move',    // Invoices
-        'res.partner',     // Contacts/Partners
-        'hr.employee',     // Employees
+        'res.company',          // Companies
+        'res.partner',          // Contacts/Partners
+        'res.users',            // Users
+        'hr.employee',          // Employees
+        'product.product',      // Products
+        'product.category',     // Product Categories
+        'crm.lead',             // CRM Leads/Opportunities
+        'sale.order',           // Sales Orders
+        'sale.order.line',      // Sales Order Lines
+        'account.move',         // Invoices
+        'account.move.line',    // Invoice Lines
+        'purchase.order',       // Purchase Orders
+        'purchase.order.line',  // Purchase Order Lines
+        'account.journal',      // Journals
+        'account.account',      // Chart of Accounts
     ] as const,
 
     /**
@@ -93,18 +135,40 @@ export type SupportedModule = (typeof SYNC_CONFIG.SUPPORTED_MODULES)[number];
  * Module display names for logging and UI
  */
 export const MODULE_DISPLAY_NAMES: Record<SupportedModule, string> = {
-    'sale.order': 'Sales Orders',
-    'account.move': 'Invoices',
+    'res.company': 'Companies',
     'res.partner': 'Contacts',
+    'res.users': 'Users',
     'hr.employee': 'Employees',
+    'product.product': 'Products',
+    'product.category': 'Product Categories',
+    'crm.lead': 'CRM Leads',
+    'sale.order': 'Sales Orders',
+    'sale.order.line': 'Sales Order Lines',
+    'account.move': 'Invoices',
+    'account.move.line': 'Invoice Lines',
+    'purchase.order': 'Purchase Orders',
+    'purchase.order.line': 'Purchase Order Lines',
+    'account.journal': 'Journals',
+    'account.account': 'Accounts',
 };
 
 /**
  * Mapping of Odoo module names to MongoDB collection names
  */
 export const MODULE_TO_COLLECTION: Record<SupportedModule, string> = {
-    'sale.order': 'odoosaleorders',
-    'account.move': 'odooinvoices',
+    'res.company': 'odoocompanies',
     'res.partner': 'odoocontacts',
+    'res.users': 'odoousers',
     'hr.employee': 'odooemployees',
+    'product.product': 'odooproducts',
+    'product.category': 'odooproductcategories',
+    'crm.lead': 'odooleads',
+    'sale.order': 'odoosaleorders',
+    'sale.order.line': 'odoosaleorderlines',
+    'account.move': 'odooinvoices',
+    'account.move.line': 'odooinvoicelines',
+    'purchase.order': 'odoopurchaseorders',
+    'purchase.order.line': 'odoopurchaseorderlines',
+    'account.journal': 'odoojournals',
+    'account.account': 'odooaccounts',
 };

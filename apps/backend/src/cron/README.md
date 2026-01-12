@@ -45,6 +45,50 @@ The cron job:
 4. Processes batches sequentially per user, but in parallel across users
 5. Updates sync status to `'done'` when all batches are complete
 
+## Test Scripts
+
+### Validate Cursor Implementation
+
+To validate the v3 cursor-based pagination implementation:
+
+```bash
+npx tsx src/cron/test-scripts/validate-cursor-implementation.js
+```
+
+This tests:
+- Multi-field ordering support (`write_date asc, id asc`)
+- Cursor domain syntax correctness
+- Combined domain (date bounds + cursor)
+- Date format compatibility with Odoo
+
+### Clear Data
+
+To clear all Odoo synced data and reset sync status:
+
+```bash
+npx tsx src/cron/test-scripts/clear-data.js
+```
+
+This will:
+- Delete all documents from all 15 Odoo module collections
+- Clear all sync batches
+- Reset sync statuses to idle
+
+### Complete Sync Test
+
+To run a complete sync of all modules and verify against Odoo:
+
+```bash
+npx tsx src/cron/test-scripts/test-complete-sync.js
+```
+
+This will:
+- Clear previous data
+- Prepare sync batches for all modules
+- Process all batches until completion
+- Verify record counts against Odoo source data
+- Display detailed sync statistics
+
 ## Monitoring
 
 Check sync status via the API endpoint:

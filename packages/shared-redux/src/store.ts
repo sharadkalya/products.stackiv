@@ -1,12 +1,14 @@
 import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import authReducer from './modules/auth/authSlice';
 import askReducer from './modules/ask/askSlice';
+import salesDashboardReducer from './modules/salesDashboard';
 
 
 // Combine reducers explicitly
 const rootReducer = combineReducers({
     auth: authReducer,
     ask: askReducer,
+    salesDashboard: salesDashboardReducer,
 });
 
 // Get RootState from combined reducer
