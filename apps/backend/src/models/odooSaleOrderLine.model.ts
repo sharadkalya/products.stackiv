@@ -151,6 +151,10 @@ OdooSaleOrderLineSchema.index({ userId: 1, odooId: 1 }, { unique: true });
 // Index for querying by order
 OdooSaleOrderLineSchema.index({ userId: 1, orderId: 1 });
 
+// Performance indexes for dashboard aggregations
+OdooSaleOrderLineSchema.index({ userId: 1, state: 1, productId: 1 });
+OdooSaleOrderLineSchema.index({ userId: 1, orderId: 1, state: 1 });
+
 export const OdooSaleOrderLine = mongoose.model<IOdooSaleOrderLine>(
     'OdooSaleOrderLine',
     OdooSaleOrderLineSchema,

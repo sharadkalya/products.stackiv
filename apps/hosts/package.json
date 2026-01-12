@@ -11,6 +11,8 @@
     "dependencies": {
         "@hookform/resolvers": "^5.0.1",
         "daisyui": "^5.0.43",
+        "highcharts": "^12.4.0",
+        "highcharts-react-official": "^3.2.3",
         "jose": "^6.1.2",
         "jsonwebtoken": "^9.0.2",
         "next": "15.3.3",

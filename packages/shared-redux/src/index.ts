@@ -6,6 +6,7 @@ export * from './modules/auth/authActions';
 export { setUser, logout } from './modules/auth/authSlice';
 export * from './modules/dummy/dummyActions';
 export * from './modules/ask/askActions';
+export * from './modules/salesDashboard';
 
 
 // Export all selectors
